@@ -1,0 +1,14 @@
+name: EZBanks
+author: LootingVI
+version: '${project.version}'
+main: de.flori.ezbanks.EZBanks
+api-version: '1.21'
+load: POSTWORLD
+dependencies:
+  server:
+    Vault:
+      load: BEFORE
+      required: true
+commands:
+  bank:
+    description: Open the bank menu
