@@ -76,15 +76,17 @@ public class ChangePinCommand implements BasicCommand {
                                 p.sendMessage(prefix + "§cPlease enter a correct amount!");
                                 return Collections.emptyList();
                             }
-                            if (MessageUtils.isValidInteger(line0)) {
-                                return List.of(
-                                        SignGUIAction.run(() -> EZBanks.getInstance().bankManager().setNewPin(bankid1, Integer.parseInt(line0))),
-                                        SignGUIAction.run(() -> player.sendMessage(prefix + "§aYou have successfully changed the PIN to: §6" + line0))
+                            if (line0.length == 4){
+                                if (MessageUtils.isValidInteger(line0)) {
+                                    return List.of(
+                                            SignGUIAction.run(() -> EZBanks.getInstance().bankManager().setNewPin(bankid1, Integer.parseInt(line0))),
+                                            SignGUIAction.run(() -> player.sendMessage(prefix + "§aYou have successfully changed the PIN to: §6" + line0))
 
                                 );
 
 
-                            } else {
+                            }
+                            }else {
                                 p.sendMessage(prefix + "§cIt must be a number!");
                                 return Collections.emptyList();
 
