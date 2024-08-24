@@ -124,19 +124,56 @@ public class BankCommand implements BasicCommand {
                                      //       .setDisplayName("§e§bDeposit a custom amount of Money")
                                       //      .setLore("§k§eM§r§7Withdraw all Money")
                                       //      .build();
+                                    ItemStack frame = new ItemBuilder(Material.BLACK_STAINED_GLASS_PANE)
+                                            .setDisplayName(" ")
+                                            .build();
                                     ItemStack withdraw = new ItemBuilder(Material.ANVIL)
                                           .setDisplayName("§e§bWithdraw a custom amount of Money")
                                           .setLore("§7Withdraw a custom amount of money")
                                           .build();
 
+                                    //Auszug
+                                    ItemStack accountStatement = new ItemBuilder(Material.PAPER)
+                                          .setDisplayName("§6§bAccount Statement")
+                                          .setLore("§7Prints out the last 10 transactions   &cComing Soon TM")
+                                          .build();
 
-                                    this.inv.setItem(0, transfer);
+                                    this.inv.setItem(0, glass);
+                                    this.inv.setItem(1, glass);
+                                    this.inv.setItem(2, glass);
+                                    this.inv.setItem(3, glass);
+                                    this.inv.setItem(4, glass);
+                                    this.inv.setItem(5, glass);
+                                    this.inv.setItem(6, glass);
+                                    this.inv.setItem(7, glass);
+                                    this.inv.setItem(8, glass);
+                                    this.inv.setItem(9, glass);
+                                    this.inv.setItem(17, glass);
+                                    this.inv.setItem(18, glass);
+                                    this.inv.setItem(26, glass);
+                                    this.inv.setItem(27, glass);
+                                    this.inv.setItem(35, glass);
+                                    this.inv.setItem(36, glass);
+                                    this.inv.setItem(44, glass);
+                                    this.inv.setItem(45, glass);
+                                    this.inv.setItem(46, glass);
+                                    this.inv.setItem(47, glass);
+                                    this.inv.setItem(48, glass);
+                                    this.inv.setItem(49, glass);
+                                    this.inv.setItem(50, glass);
+                                    this.inv.setItem(51, glass);
+                                    this.inv.setItem(52, glass);
+                                    this.inv.setItem(53, glass);
+                                    
+                                    
+                                    this.inv.setItem(10, transfer);
                                     //this.inv.setItem(1, quickTransfer);
                                     //this.inv.setItem(7, depositAll);
-                                    this.inv.setItem(8, deposit);
+                                    this.inv.setItem(16, deposit);
                                     this.inv.setItem(22, info);
                                     //this.inv.setItem(43, withdrawAll);
-                                    this.inv.setItem(44, withdraw);
+                                    this.inv.setItem(37, withdraw);
+                                    this.inv.setItem(43, accountStatement);
 
 
                                     return List.of(
