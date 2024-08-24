@@ -19,7 +19,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-import static org.apache.logging.log4j.LogManager.getLogger;
 import static org.bukkit.persistence.PersistentDataType.*;
 
 public class BankCommand implements BasicCommand {
@@ -67,7 +66,7 @@ public class BankCommand implements BasicCommand {
                     String value = container.get(key, PersistentDataType.STRING);
                     SignGUI gui = SignGUI.builder()
                             // set lines
-                            .setLines(null, "§7-----------", "§cType ur pin in first line", "§7-----------")
+                            .setLines(null, "§7-----------", "§cType ur PIN in first line", "§7-----------")
 
                             // set specific line, starting index is 0
 
@@ -92,7 +91,7 @@ public class BankCommand implements BasicCommand {
                                 String[] linesWithoutColor = result.getLinesWithoutColor();
 
                                 if (line0.isEmpty()) {
-                                    p.sendMessage(prefix + "§cThe pin is not correct!");
+                                    p.sendMessage(prefix + "§cThe PIN is not correct!");
                                     return Collections.emptyList();
                                 }
 
@@ -105,45 +104,80 @@ public class BankCommand implements BasicCommand {
                                             .setLore("§7Send Money to another bank account!")
                                             .build();
                                     //ItemStack quickTransfer = new ItemBuilder(Material.TIPPED_ARROW)
-                                     //       .setDisplayName("§e§bSend Money (instantly)")
-                                     //       .setLore("§k§eM§r§7Send Money to another bank account &b&cINSTANTLY!", "", "§7Arrival Time: A Few Ticks", "", "§7You will be charged §6§b12‰§r§6 Transaction Taxes!")
-                                        //    .build();
+                                    //       .setDisplayName("§e§bSend Money (instantly)")
+                                    //       .setLore("§k§eM§r§7Send Money to another bank account &b&cINSTANTLY!", "", "§7Arrival Time: A Few Ticks", "", "§7You will be charged §6§b12‰§r§6 Transaction Taxes!")
+                                    //    .build();
                                     ItemStack info = new ItemBuilder(Material.KNOWLEDGE_BOOK)
-                                        .setDisplayName("§6§bOwner: &r&f" + Bukkit.getOfflinePlayer(owner).getName())
+                                            .setDisplayName("§6§bOwner: &r&f" + Bukkit.getOfflinePlayer(owner).getName())
                                             .setLore("§e§bID: §r§6"+ container.get(key, PersistentDataType.STRING) , "§e§bBalance: §r§a" +  balance + symbol)
                                             .build();
                                     //ItemStack depositAll = new ItemBuilder(Material.DISPENSER)
-                                      //      .setDisplayName("§e§bDeposit all Money")
-                                        //    .setLore("§k§eM§r§7Deposit &cALL &7Money!")
-                                        //    .build();
+                                    //      .setDisplayName("§e§bDeposit all Money")
+                                    //    .setLore("§k§eM§r§7Deposit &cALL &7Money!")
+                                    //    .build();
                                     ItemStack deposit = new ItemBuilder(Material.DISPENSER)
                                             .setDisplayName("§e§bDeposit a custom amount of Money")
                                             .setLore("§7Deposit a set amount of Money")
                                             .build();
                                     //ItemStack withdrawAll = new ItemBuilder(Material.DISPENSER)
-                                     //       .setDisplayName("§e§bDeposit a custom amount of Money")
-                                      //      .setLore("§k§eM§r§7Withdraw all Money")
-                                      //      .build();
+                                    //       .setDisplayName("§e§bDeposit a custom amount of Money")
+                                    //      .setLore("§k§eM§r§7Withdraw all Money")
+                                    //      .build();
+                                    ItemStack frame = new ItemBuilder(Material.BLACK_STAINED_GLASS_PANE)
+                                            .setDisplayName(" ")
+                                            .build();
                                     ItemStack withdraw = new ItemBuilder(Material.ANVIL)
-                                          .setDisplayName("§e§bWithdraw a custom amount of Money")
-                                          .setLore("§7Withdraw a custom amount of money")
-                                          .build();
+                                            .setDisplayName("§e§bWithdraw a custom amount of Money")
+                                            .setLore("§7Withdraw a custom amount of money")
+                                            .build();
+
+                                    //Auszug
+                                    ItemStack accountStatement = new ItemBuilder(Material.PAPER)
+                                            .setDisplayName("§6§bAccount Statement")
+                                            .setLore("§7Prints out the last 10 transactions   §cComing Soon TM")
+                                            .build();
+
+                                    this.inv.setItem(0, frame);
+                                    this.inv.setItem(1, frame);
+                                    this.inv.setItem(2, frame);
+                                    this.inv.setItem(3, frame);
+                                    this.inv.setItem(4, frame);
+                                    this.inv.setItem(5, frame);
+                                    this.inv.setItem(6, frame);
+                                    this.inv.setItem(7, frame);
+                                    this.inv.setItem(8, frame);
+                                    this.inv.setItem(9, frame);
+                                    this.inv.setItem(17, frame);
+                                    this.inv.setItem(18, frame);
+                                    this.inv.setItem(26, frame);
+                                    this.inv.setItem(27, frame);
+                                    this.inv.setItem(35, frame);
+                                    this.inv.setItem(36, frame);
+                                    this.inv.setItem(37, frame);
+                                    this.inv.setItem(38, frame);
+                                    this.inv.setItem(39, frame);
+                                    this.inv.setItem(40, frame);
+                                    this.inv.setItem(41, frame);
+                                    this.inv.setItem(42, frame);
+                                    this.inv.setItem(43, frame);
+                                    this.inv.setItem(44, frame);
 
 
-                                    this.inv.setItem(0, transfer);
+                                    this.inv.setItem(10, transfer);
                                     //this.inv.setItem(1, quickTransfer);
                                     //this.inv.setItem(7, depositAll);
-                                    this.inv.setItem(8, deposit);
+                                    this.inv.setItem(16, deposit);
                                     this.inv.setItem(22, info);
                                     //this.inv.setItem(43, withdrawAll);
-                                    this.inv.setItem(44, withdraw);
+                                    this.inv.setItem(28, withdraw);
+                                    this.inv.setItem(34, accountStatement);
 
 
                                     return List.of(
                                             SignGUIAction.openInventory(EZBanks.getInstance(), inv)
                                     );
                                 } else {
-                                    p.sendMessage(prefix + "§cThe pin is not correct!");
+                                    p.sendMessage(prefix + "§cThe PIN is not correct!");
                                     return Collections.emptyList();
                                 }
 

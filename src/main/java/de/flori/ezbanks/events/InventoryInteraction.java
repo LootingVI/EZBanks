@@ -83,7 +83,7 @@ public class InventoryInteraction implements Listener {
 
 
                                 if (line0.isEmpty()) {
-                                    p.sendMessage(prefix + "§cPlease enter a correct bank id!");
+                                    p.sendMessage(prefix + "§cPlease enter a correct bank ID!");
                                     return Collections.emptyList();
                                 }
 
@@ -94,7 +94,7 @@ public class InventoryInteraction implements Listener {
                                 }
  */
                                 if(EZBanks.getInstance().bankManager().getBankAccount(line0) == null){
-                                    p.sendMessage(prefix + "§cPlease enter a correct bank id!");
+                                    p.sendMessage(prefix + "§cPlease enter a correct bank ID!");
                                     return Collections.emptyList();
                                 }else{
 

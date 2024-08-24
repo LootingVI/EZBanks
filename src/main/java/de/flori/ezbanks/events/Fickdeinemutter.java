@@ -51,7 +51,7 @@ public class Fickdeinemutter implements Listener {
                     player.getInventory().addItem(ex);
 
                     player.sendMessage(prefix + "§aYou have successfully bought a new bank card!");
-                    player.sendMessage("§cI hope you remember your pin?");
+                    player.sendMessage("§cI hope you remember your PIN? If not run /setpin");
 
                 }else{
                     player.sendMessage(prefix + "§cYou don't have enough money!");

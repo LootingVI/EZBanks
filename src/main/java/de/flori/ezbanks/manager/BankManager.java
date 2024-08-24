@@ -66,6 +66,12 @@ public class BankManager {
         databaseManager.update("UPDATE `bank` SET `balance` = '" + newBalance + "' WHERE `bank`.`bid` = '" + bankId+ "'; ");
 
     }
+    public void setNewPin(String bankId, Integer pin){
+
+        databaseManager.update("UPDATE `bank` SET `pin` = '" + pin + "' WHERE `bank`.`bid` = '" + bankId+ "'; ");
+
+    }
+
 
     public void removeBalance(String bankId, Double moneyToRemove){
 
