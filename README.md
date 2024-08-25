@@ -4,6 +4,6 @@
 
 Join our discord [EZ-Development](https://discord.gg/aFKtmjAVxT ":)")
 
-```/ezbhelp``` to see a list of commands ingame
+```/bankhelp``` to see a list of commands ingame
 
 (requires Vault and Economy Plugin)
