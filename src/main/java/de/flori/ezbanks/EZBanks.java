@@ -2,6 +2,7 @@ package de.flori.ezbanks;
 
 import de.flori.ezbanks.commands.BankCommand;
 import de.flori.ezbanks.commands.ChangePinCommand;
+import de.flori.ezbanks.commands.HelpCommand;
 import de.flori.ezbanks.config.ConfigManager;
 import de.flori.ezbanks.config.ConfigManager;
 import de.flori.ezbanks.database.DatabaseManager;
@@ -57,6 +58,7 @@ public final class EZBanks extends JavaPlugin {
             final Commands commands = event.registrar();
             commands.register("bank", "Open ur bank menu", new BankCommand());
             commands.register("setpin", "Set a new pin for u bank account", new ChangePinCommand());
+            commands.register("bankhelp", "Help with bank commands", new HelpCommand());
         });
 
 
