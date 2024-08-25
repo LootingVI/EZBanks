@@ -4,23 +4,16 @@ import de.flori.ezbanks.commands.BankCommand;
 import de.flori.ezbanks.commands.ChangePinCommand;
 import de.flori.ezbanks.commands.HelpCommand;
 import de.flori.ezbanks.config.ConfigManager;
-import de.flori.ezbanks.config.ConfigManager;
 import de.flori.ezbanks.database.DatabaseManager;
-import de.flori.ezbanks.events.Fickdeinemutter;
+import de.flori.ezbanks.events.EventBummlux;
+import de.flori.ezbanks.events.EventDingens;
 import de.flori.ezbanks.events.InventoryInteraction;
 import de.flori.ezbanks.manager.BankManager;
 import io.papermc.paper.command.brigadier.Commands;
-import io.papermc.paper.plugin.bootstrap.BootstrapContext;
-import io.papermc.paper.plugin.lifecycle.event.LifecycleEventManager;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import lombok.Generated;
 import lombok.Getter;
 import net.milkbowl.vault.economy.Economy;
-import org.bukkit.Bukkit;
-import org.bukkit.Server;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.event.Listener;
-import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -52,7 +45,8 @@ public final class EZBanks extends JavaPlugin {
          */
 
         getServer().getPluginManager().registerEvents(new InventoryInteraction(), this);
-        getServer().getPluginManager().registerEvents(new Fickdeinemutter(), this);
+        getServer().getPluginManager().registerEvents(new EventBummlux(), this);
+        getServer().getPluginManager().registerEvents(new EventDingens(), this);
 
         this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, event -> {
             final Commands commands = event.registrar();

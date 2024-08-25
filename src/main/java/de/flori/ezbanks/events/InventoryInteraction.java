@@ -33,6 +33,7 @@ public class InventoryInteraction implements Listener {
 
     public Inventory inv = null;
 
+
     @EventHandler
     public void onInteract(InventoryClickEvent event) {
         try {
@@ -107,7 +108,8 @@ public class InventoryInteraction implements Listener {
                     gui.open(player);
                 }
 
-                if(event.getCurrentItem().getType() == Material.ANVIL){
+                if(event.getCurrentItem().getType() == Material.DISPENSER){
+                    String log;
                     SignGUI gui = SignGUI.builder()
                             // set lines
                             .setLines(null, "§-----------", "§cType amount in first line", "§-----------")
@@ -154,6 +156,7 @@ public class InventoryInteraction implements Listener {
                                     );
 
 
+
                                 } else {
                                     p.sendMessage(prefix + "§cYou don't have enough money in your bank account!");
                                     return Collections.emptyList();
@@ -164,7 +167,7 @@ public class InventoryInteraction implements Listener {
                     gui.open(player);
                 }
 
-                if(event.getCurrentItem().getType() == Material.DISPENSER){
+                if(event.getCurrentItem().getType() == Material.ANVIL){
                     SignGUI gui = SignGUI.builder()
                             // set lines
                             .setLines(null, "§-----------", "§cType amount in first line", "§-----------")
@@ -207,6 +210,7 @@ public class InventoryInteraction implements Listener {
                                     return List.of(
                                             SignGUIAction.run(() -> EZBanks.getEconomy().withdrawPlayer(player, Double.parseDouble(line0))),
                                             SignGUIAction.run(() -> EZBanks.getInstance().bankManager().addBalance(bankId, Double.parseDouble(line0))),
+
                                             SignGUIAction.run(() -> player.sendMessage(prefix + "§aSuccessful bank transfer of §6" + line0 + symbol))
                                     );
 

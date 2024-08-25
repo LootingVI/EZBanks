@@ -2,19 +2,32 @@ package de.flori.ezbanks.events;
 
 import de.flori.ezbanks.EZBanks;
 import de.flori.ezbanks.utils.ItemBuilder;
+import de.rapha149.signgui.SignGUI;
+import de.rapha149.signgui.SignGUIAction;
+import org.bukkit.Bukkit;
+import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataType;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
 
 import static org.bukkit.persistence.PersistentDataType.STRING;
 
-public class Fickdeinemutter implements Listener {
+public class EventBummlux implements Listener {
+
+    public Inventory inv = null;
+
     @EventHandler
     public void onFick(InventoryClickEvent event){
 
@@ -29,7 +42,7 @@ public class Fickdeinemutter implements Listener {
         String symbol = EZBanks.getInstance().configManager().getSymbol();
         double balance = EZBanks.getEconomy().getBalance(player);
         int cardcost = EZBanks.getInstance().configManager().getCardCost();
-
+//skibidi
 
         String prefix = EZBanks.getInstance().configManager().getPrefix();
 
@@ -60,5 +73,6 @@ public class Fickdeinemutter implements Listener {
             }
             event.setCancelled(true);
         }
+
     }
 }
