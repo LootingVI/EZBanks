@@ -41,13 +41,11 @@ public class ChangePinCommand implements BasicCommand {
 
         if (player.getItemInHand().getType() == Material.PAPER) {
 
-            player.sendMessage(prefix + owner);
-
             if (owner.equals(player.getUniqueId())) {
 
                 SignGUI gui1 = SignGUI.builder()
                         // set lines
-                        .setLines(null, "§-----------", "§cType new pin in first line", "§-----------")
+                        .setLines(null, "§-----------", "§cType new PIN in first line", "§-----------")
 
                         // set specific line, starting index is 0
 

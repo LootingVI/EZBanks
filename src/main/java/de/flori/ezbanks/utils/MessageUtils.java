@@ -1,8 +1,5 @@
 package de.flori.ezbanks.utils;
 
-import de.flori.ezbanks.utils.Patterns;
-import de.flori.ezbanks.utils.RandomUtils;
-import de.flori.ezbanks.utils.Utils;
 import org.jetbrains.annotations.NotNull;
 
 import java.text.NumberFormat;
