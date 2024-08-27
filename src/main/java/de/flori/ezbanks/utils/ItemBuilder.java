@@ -354,8 +354,18 @@ public class ItemBuilder {
         return this;
     }
 
+    public ItemBuilder setPersistentDataContainer(NamespacedKey key, String value) {
+        meta.getPersistentDataContainer().set(key, PersistentDataType.STRING, value);
+        return this;
+    }
+
     public ItemBuilder setPersistentDataContainer(String key, int value) {
         meta.getPersistentDataContainer().set(new NamespacedKey(EZBanks.getInstance(), key), PersistentDataType.INTEGER, value);
+        return this;
+    }
+
+    public ItemBuilder setPersistentDataContainer(NamespacedKey key, int value) {
+        meta.getPersistentDataContainer().set(key, PersistentDataType.INTEGER, value);
         return this;
     }
 
@@ -364,8 +374,18 @@ public class ItemBuilder {
         return this;
     }
 
+    public ItemBuilder setPersistentDataContainer(NamespacedKey key, double value) {
+        meta.getPersistentDataContainer().set(key, PersistentDataType.DOUBLE, value);
+        return this;
+    }
+
     public ItemBuilder setPersistentDataContainer(String key, float value) {
         meta.getPersistentDataContainer().set(new NamespacedKey(EZBanks.getInstance(), key), PersistentDataType.FLOAT, value);
+        return this;
+    }
+
+    public ItemBuilder setPersistentDataContainer(NamespacedKey key, float value) {
+        meta.getPersistentDataContainer().set(key, PersistentDataType.FLOAT, value);
         return this;
     }
 
@@ -374,8 +394,18 @@ public class ItemBuilder {
         return this;
     }
 
+    public ItemBuilder setPersistentDataContainer(NamespacedKey key, long value) {
+        meta.getPersistentDataContainer().set(key, PersistentDataType.LONG, value);
+        return this;
+    }
+
     public ItemBuilder setPersistentDataContainer(String key, short value) {
         meta.getPersistentDataContainer().set(new NamespacedKey(EZBanks.getInstance(), key), PersistentDataType.SHORT, value);
+        return this;
+    }
+
+    public ItemBuilder setPersistentDataContainer(NamespacedKey key, short value) {
+        meta.getPersistentDataContainer().set(key, PersistentDataType.SHORT, value);
         return this;
     }
 
@@ -384,8 +414,18 @@ public class ItemBuilder {
         return this;
     }
 
+    public ItemBuilder setPersistentDataContainer(NamespacedKey key, byte value) {
+        meta.getPersistentDataContainer().set(key, PersistentDataType.BYTE, value);
+        return this;
+    }
+
     public ItemBuilder setPersistentDataContainer(String key, boolean value) {
         meta.getPersistentDataContainer().set(new NamespacedKey(EZBanks.getInstance(), key), PersistentDataType.BYTE, value ? (byte) 1 : (byte) 0);
+        return this;
+    }
+
+    public ItemBuilder setPersistentDataContainer(NamespacedKey key, boolean value) {
+        meta.getPersistentDataContainer().set(key, PersistentDataType.BYTE, value ? (byte) 1 : (byte) 0);
         return this;
     }
 

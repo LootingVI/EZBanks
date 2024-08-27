@@ -1,23 +1,25 @@
 package de.flori.ezbanks.commands;
 
-import io.papermc.paper.command.brigadier.BasicCommand;
-import io.papermc.paper.command.brigadier.CommandSourceStack;
-import org.bukkit.ChatColor;
+import net.kyori.adventure.text.Component;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-public class HelpCommand implements BasicCommand {
+public class HelpCommand extends Command {
 
+    public HelpCommand() {
+        super("bankhelp");
+    }
 
     @Override
-    public void execute(@NotNull CommandSourceStack commandSourceStack, @NotNull String[] strings) {
+    public boolean execute(@NotNull CommandSender sender, @NotNull String s, @NotNull String[] strings) {
+        if (!(sender instanceof Player player))
+            return false;
 
-        if (commandSourceStack instanceof Player) {
-
-            Player player = (Player) commandSourceStack.getSender();
-
-            player.sendMessage(ChatColor.RED + "/bank - Opens Bank GUI");
-            player.sendMessage(ChatColor.RED + "/setpin - Allows you to change your pin (only works on your own card)");
-        }
+        player.sendMessage(Component.text("§c/bank §8- §7Opens Bank GUI"));
+        player.sendMessage(Component.text("§c/setpin §8- §7Allows you to change your pin (only works on your own card)"));
+        return true;
     }
+
 }

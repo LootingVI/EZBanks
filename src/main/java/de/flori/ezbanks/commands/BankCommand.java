@@ -1,85 +1,54 @@
 package de.flori.ezbanks.commands;
 
 import de.flori.ezbanks.EZBanks;
-import de.flori.ezbanks.functions.CreateBankAccount;
-import de.flori.ezbanks.utils.ItemBuilder;
-import de.rapha149.signgui.SignGUI;
-import de.rapha149.signgui.SignGUIAction;
-import io.papermc.paper.command.brigadier.BasicCommand;
-import io.papermc.paper.command.brigadier.CommandSourceStack;
-import org.bukkit.*;
+import de.flori.ezbanks.gui.BankMenuGUI;
+import de.flori.ezbanks.gui.BuyCardGUI;
+import de.flori.ezbanks.manager.impl.BankAccount;
+import de.flori.ezbanks.utils.ItemUtils;
+import net.kyori.adventure.text.Component;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.persistence.PersistentDataContainer;
-import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 
-import static org.bukkit.persistence.PersistentDataType.*;
+public class BankCommand extends Command {
 
-public class BankCommand implements BasicCommand {
-
-    public Inventory inv = null;
-    public Inventory inv1 = null;
+    public BankCommand() {
+        super("bank");
+    }
 
     @Override
-    public void execute(@NotNull CommandSourceStack commandSourceStack, @NotNull String[] strings) {
+    public boolean execute(@NotNull CommandSender sender, @NotNull String s, @NotNull String[] strings) {
+        if (!(sender instanceof Player player))
+            return false;
 
-        Player player = (Player) commandSourceStack.getSender();
-        String prefix = EZBanks.getInstance().configManager().getPrefix();
-        String symbol = EZBanks.getInstance().configManager().getSymbol();
-        int cardcost = EZBanks.getInstance().configManager().getCardCost();
-
-
-        if (EZBanks.getInstance().bankManager().getBankAccount(player.getUniqueId()) == null) {
-            new CreateBankAccount(player.getUniqueId());
-        } else {
-
-            if(!player.getInventory().contains(Material.PAPER)){
-                this.inv1 = player.getServer().createInventory(null, 45, "§cNew card");
-
-                ItemStack buynewcard = new ItemBuilder(Material.BOOK)
-                        .setDisplayName("§eBuy a new credit card")
-                        .setLore("§cCost: §6" + cardcost + symbol)
-                        .build();
-
-                this.inv1.setItem(22, buynewcard);
-
-                player.openInventory(inv1);
-            }
-
-            if(player.getItemInHand().getType() == Material.PAPER){
-
-                NamespacedKey key = new NamespacedKey(EZBanks.getInstance(), "bankid");
-                PersistentDataContainer container = player.getItemInHand().getItemMeta().getPersistentDataContainer();
-                if (container.has(key, PersistentDataType.STRING)) {
-                    this.inv = player.getServer().createInventory(null, 27, "§cBank menu");
-
-                    ItemStack openBankMenu = new ItemBuilder(Material.CHEST)
-                            .setDisplayName("§eOpen bank menu")
-                            .setLore("§aOpen the main bank menu")
-                            .build();
-
-                    ItemStack resetPin = new ItemBuilder(Material.NAME_TAG)
-                            .setDisplayName("§eReset card PIN")
-                            .setLore("§aChange ur bank card pin")
-                            .build();
-
-                    this.inv.setItem(11, openBankMenu);
-                    this.inv.setItem(15, resetPin);
-
-                    player.openInventory(inv);
-                } else {
-                    player.sendMessage(prefix + "§cNo bank card recognised! Please hold a bank card in your hand.");
-                }
+        if (EZBanks.getInstance().getBankManager().hasBankAccount(player.getUniqueId())) {
+            if (!ItemUtils.hasBankCard(player)) {
+                player.openInventory(new BuyCardGUI().getInventory());
             } else {
-                player.sendMessage(prefix + "§cNo bank card recognised! Please hold a bank card in your hand.");
+                final ItemStack itemStack = player.getInventory().getItemInMainHand();
+                if (ItemUtils.isBankCard(itemStack)) {
+                    player.openInventory(new BankMenuGUI().getInventory());
+                } else {
+                    player.sendMessage(Component.text(EZBanks.getPrefix() + "§cNo bank card recognised! Please hold a bank card in your hand."));
+                }
             }
+        } else {
+            final String bankId = UUID.randomUUID().toString().split("-")[0];
+            final int pin = ThreadLocalRandom.current().nextInt(1000, 10000);
 
+            final BankAccount bankAccount = new BankAccount(bankId, player.getUniqueId(), 0, pin, false);
+            EZBanks.getInstance().getBankManager().createBankAccount(bankAccount);
+
+            player.sendMessage(Component.text(EZBanks.getPrefix() + "§aYou have successfully created a new account. Your bank account pin is: " + pin));
+            player.sendMessage(Component.text("§cBut remember them well! You can't access your bank account without it!"));
+            player.getInventory().addItem(ItemUtils.getBankCard(bankAccount));
         }
+        return true;
     }
+
 }

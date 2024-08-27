@@ -15,21 +15,29 @@ public class BankManager {
 
     public BankManager() {
         this.databaseManager = EZBanks.getInstance().getDatabaseManager();
-        databaseManager.update("CREATE TABLE IF NOT EXISTS `bank` (`bid` VARCHAR(10) NOT NULL PRIMARY KEY, `ownerid` UUID NOT NULL, `balance` DOUBLE NOT NULL, `suspended` INT NOT NULL, `pin` INT NOT NULL) ENGINE = InnoDB;");
+        databaseManager.update("CREATE TABLE IF NOT EXISTS `banks` (`id` VARCHAR(10) NOT NULL PRIMARY KEY, `ownerUuid` UUID NOT NULL, `balance` DOUBLE NOT NULL, `suspended` INT NOT NULL, `pin` INT NOT NULL) ENGINE = InnoDB;");
     }
 
     public void createBankAccount(BankAccount account) {
-        databaseManager.update("INSERT INTO `bank` (`bid`, `ownerid`, `balance`, `suspended`, `pin`) VALUES ('" + account.getBankId() + "', '" + account.getOwnerId() + "', '" + account.getBalance() + "', '" + (account.isSuspended() ? "1" : "0") + "', '" + account.getPin() + "');");
+        databaseManager.update("INSERT INTO `banks` (`id`, `ownerUuid`, `balance`, `suspended`, `pin`) VALUES ('" + account.getBankId() + "', '" + account.getOwnerUuid() + "', '" + account.getBalance() + "', '" + (account.isSuspended() ? "1" : "0") + "', '" + account.getPin() + "');");
+    }
+
+    public boolean hasBankAccount(UUID ownerUuid) {
+        try (ResultSet resultSet = databaseManager.getResult("SELECT * FROM `banks` WHERE ownerUuid='" + ownerUuid + "'")) {
+            return resultSet.next();
+        } catch (SQLException exception) {
+            exception.printStackTrace(new PrintStream(System.err));
+            return false;
+        }
     }
 
     public BankAccount getBankAccount(String bankId) {
-        try (ResultSet resultSet = databaseManager.getResult("SELECT * FROM `bank` WHERE bid='" + bankId + "'")) {
-            if (!resultSet.next())
-                return null;
+        try (ResultSet resultSet = databaseManager.getResult("SELECT * FROM `banks` WHERE id='" + bankId + "'")) {
+            if (!resultSet.next()) return null;
 
             return new BankAccount(
-                    resultSet.getString("bid"),
-                    UUID.fromString(resultSet.getString("ownerid")),
+                    resultSet.getString("id"),
+                    UUID.fromString(resultSet.getString("ownerUuid")),
                     resultSet.getDouble("balance"),
                     resultSet.getInt("pin"),
                     resultSet.getInt("suspended") == 1
@@ -40,14 +48,13 @@ public class BankManager {
         }
     }
 
-    public BankAccount getBankAccount(UUID ownerID) {
-        try (ResultSet resultSet = databaseManager.getResult("SELECT * FROM `bank` WHERE ownerid='" + ownerID + "'")) {
-            if (!resultSet.next())
-                return null;
+    public BankAccount getBankAccount(UUID ownerUuid) {
+        try (ResultSet resultSet = databaseManager.getResult("SELECT * FROM `banks` WHERE ownerUuid='" + ownerUuid + "'")) {
+            if (!resultSet.next()) return null;
 
             return new BankAccount(
-                    resultSet.getString("bid"),
-                    UUID.fromString(resultSet.getString("ownerid")),
+                    resultSet.getString("id"),
+                    UUID.fromString(resultSet.getString("ownerUuid")),
                     resultSet.getDouble("balance"),
                     resultSet.getInt("pin"),
                     resultSet.getInt("suspended") == 1
@@ -58,28 +65,22 @@ public class BankManager {
         }
     }
 
-    public void addBalance(String bankId, Double moneyToAdd){
+    public void addBalance(BankAccount account, double amount) {
+        final double currentBalance = account.getBalance();
+        final double newBalance = currentBalance + amount;
 
-        Double oldBalance = getBankAccount(bankId).getBalance();
-        Double newBalance = oldBalance + moneyToAdd;
-
-        databaseManager.update("UPDATE `bank` SET `balance` = '" + newBalance + "' WHERE `bank`.`bid` = '" + bankId+ "'; ");
-
-    }
-    public void setNewPin(String bankId, Integer pin){
-
-        databaseManager.update("UPDATE `bank` SET `pin` = '" + pin + "' WHERE `bank`.`bid` = '" + bankId+ "'; ");
-
+        databaseManager.update("UPDATE `banks` SET `balance` = '" + newBalance + "' WHERE `id` = '" + account.getBankId() + "'; ");
     }
 
+    public void changePin(BankAccount account, Integer pin){
+        databaseManager.update("UPDATE `banks` SET `pin` = '" + pin + "' WHERE `id` = '" + account.getBankId() + "'; ");
+    }
 
-    public void removeBalance(String bankId, Double moneyToRemove){
+    public void removeBalance(BankAccount account, double amount){
+        final double currentBalance = account.getBalance();
+        final double newBalance = currentBalance - amount;
 
-        Double oldBalance = getBankAccount(bankId).getBalance();
-        Double newBalance = oldBalance - moneyToRemove;
-
-        databaseManager.update("UPDATE `bank` SET `balance` = '" + newBalance + "' WHERE `bank`.`bid` = '" + bankId+ "'; ");
-
+        databaseManager.update("UPDATE `banks` SET `balance` = '" + newBalance + "' WHERE `id` = '" + account.getBankId() + "'; ");
     }
 
 }
