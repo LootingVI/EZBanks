@@ -1,10 +1,12 @@
 package de.flori.ezbanks.gui;
 
 import de.flori.ezbanks.EZBanks;
+import de.flori.ezbanks.manager.enums.TransactionType;
 import de.flori.ezbanks.manager.impl.BankAccount;
 import de.flori.ezbanks.utils.ItemBuilder;
 import de.flori.ezbanks.utils.ItemUtils;
 import de.flori.ezbanks.utils.MessageUtils;
+import de.flori.ezbanks.utils.Utils;
 import de.rapha149.signgui.SignGUI;
 import de.rapha149.signgui.SignGUIAction;
 import lombok.NoArgsConstructor;
@@ -21,8 +23,11 @@ import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 
 @NoArgsConstructor
 public class BankAccountGUI implements InventoryHolder, Listener {
@@ -74,9 +79,14 @@ public class BankAccountGUI implements InventoryHolder, Listener {
                 .setLore("§7Withdraw a custom amount of money")
                 .build();
 
+        final StringBuilder builder = new StringBuilder();
+        account.getTransactions().reversed().forEach(transaction -> {
+            builder.append(transaction.getType().getDisplayName() + " §6").append(transaction.getAmount() + EZBanks.getInstance().getConfigManager().getSymbol()).append("§b " + Bukkit.getOfflinePlayer(transaction.getPlayer()).getName()).append(" §7" + Utils.DATE_AND_TIME_FORMAT.format(transaction.getTimestamp())).append('\n');
+        });
+
         final ItemStack accountStatementItemStack = new ItemBuilder(Material.PAPER)
-                .setDisplayName("§bAccount Statement")
-                .setLore("§7Prints out the last 10 transactions   §cComing Soon TM")
+                .setDisplayName("§bBank Transactions")
+                .setLore(builder.toString().split("\n"))
                 .build();
 
         inventory.setItem(10, transferItemStack);
@@ -157,6 +167,8 @@ public class BankAccountGUI implements InventoryHolder, Listener {
 
                                                 EZBanks.getInstance().getBankManager().removeBalance(account, amountInt);
                                                 EZBanks.getInstance().getBankManager().addBalance(targetAccount, amountInt);
+                                                EZBanks.getInstance().getBankManager().addTransaction(account, TransactionType.TRANSFER_OUT, amountInt, p.getUniqueId());
+                                                EZBanks.getInstance().getBankManager().addTransaction(targetAccount, TransactionType.TRANSFER_IN, amountInt, p.getUniqueId());
 
                                                 p1.sendMessage(Component.text(EZBanks.getPrefix() + "§aYou have successfully transferred §6" + amount + EZBanks.getInstance().getConfigManager().getSymbol() + " §ato §b" + Bukkit.getOfflinePlayer(targetAccount.getOwnerUuid()).getName()));
                                                 return List.of();
@@ -194,6 +206,8 @@ public class BankAccountGUI implements InventoryHolder, Listener {
                                 EZBanks.getInstance().getBankManager().removeBalance(account, amountInt);
                                 EZBanks.getInstance().getEconomy().depositPlayer(p, amountInt);
 
+                                EZBanks.getInstance().getBankManager().addTransaction(account, TransactionType.REMOVE_MONEY, amountInt, p.getUniqueId());
+
                                 p.sendMessage(Component.text(EZBanks.getPrefix() + "§aYou have successfully withdrawn §6" + amount + EZBanks.getInstance().getConfigManager().getSymbol()));
                                 return List.of();
                             })
@@ -224,6 +238,8 @@ public class BankAccountGUI implements InventoryHolder, Listener {
 
                                 EZBanks.getInstance().getBankManager().addBalance(account, amountInt);
                                 EZBanks.getInstance().getEconomy().withdrawPlayer(p, amountInt);
+
+                                EZBanks.getInstance().getBankManager().addTransaction(account, TransactionType.ADD_MONEY, amountInt, p.getUniqueId());
 
                                 p.sendMessage(Component.text(EZBanks.getPrefix() + "§aYou have successfully deposited §6" + amount + EZBanks.getInstance().getConfigManager().getSymbol()));
                                 return List.of();

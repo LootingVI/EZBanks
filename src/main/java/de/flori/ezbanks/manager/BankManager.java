@@ -1,8 +1,12 @@
 package de.flori.ezbanks.manager;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import de.flori.ezbanks.EZBanks;
 import de.flori.ezbanks.database.DatabaseManager;
+import de.flori.ezbanks.manager.enums.TransactionType;
 import de.flori.ezbanks.manager.impl.BankAccount;
+import de.flori.ezbanks.manager.impl.Transaction;
 
 import java.io.PrintStream;
 import java.sql.ResultSet;
@@ -11,15 +15,16 @@ import java.util.UUID;
 
 public class BankManager {
 
+    private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
     private final DatabaseManager databaseManager;
 
     public BankManager() {
         this.databaseManager = EZBanks.getInstance().getDatabaseManager();
-        databaseManager.update("CREATE TABLE IF NOT EXISTS `banks` (`id` VARCHAR(10) NOT NULL PRIMARY KEY, `ownerUuid` UUID NOT NULL, `balance` DOUBLE NOT NULL, `suspended` INT NOT NULL, `pin` INT NOT NULL) ENGINE = InnoDB;");
+        databaseManager.update("CREATE TABLE IF NOT EXISTS `banks` (`id` VARCHAR(10) NOT NULL PRIMARY KEY, `ownerUuid` UUID NOT NULL, `data` TEXT) ENGINE = InnoDB;");
     }
 
     public void createBankAccount(BankAccount account) {
-        databaseManager.update("INSERT INTO `banks` (`id`, `ownerUuid`, `balance`, `suspended`, `pin`) VALUES ('" + account.getBankId() + "', '" + account.getOwnerUuid() + "', '" + account.getBalance() + "', '" + (account.isSuspended() ? "1" : "0") + "', '" + account.getPin() + "');");
+        databaseManager.update("INSERT INTO `banks` (`id`, `ownerUuid`, `data`) VALUES ('" + account.getBankId() + "', '" + account.getOwnerUuid() + "', '" + gson.toJson(account) + "');");
     }
 
     public boolean hasBankAccount(UUID ownerUuid) {
@@ -34,14 +39,7 @@ public class BankManager {
     public BankAccount getBankAccount(String bankId) {
         try (ResultSet resultSet = databaseManager.getResult("SELECT * FROM `banks` WHERE id='" + bankId + "'")) {
             if (!resultSet.next()) return null;
-
-            return new BankAccount(
-                    resultSet.getString("id"),
-                    UUID.fromString(resultSet.getString("ownerUuid")),
-                    resultSet.getDouble("balance"),
-                    resultSet.getInt("pin"),
-                    resultSet.getInt("suspended") == 1
-            );
+            return gson.fromJson(resultSet.getString("data"), BankAccount.class);
         } catch (SQLException exception) {
             exception.printStackTrace(new PrintStream(System.err));
             return null;
@@ -51,36 +49,43 @@ public class BankManager {
     public BankAccount getBankAccount(UUID ownerUuid) {
         try (ResultSet resultSet = databaseManager.getResult("SELECT * FROM `banks` WHERE ownerUuid='" + ownerUuid + "'")) {
             if (!resultSet.next()) return null;
-
-            return new BankAccount(
-                    resultSet.getString("id"),
-                    UUID.fromString(resultSet.getString("ownerUuid")),
-                    resultSet.getDouble("balance"),
-                    resultSet.getInt("pin"),
-                    resultSet.getInt("suspended") == 1
-            );
+            return gson.fromJson(resultSet.getString("data"), BankAccount.class);
         } catch (SQLException exception) {
             exception.printStackTrace(new PrintStream(System.err));
             return null;
         }
     }
 
+    public void updateBankAccount(BankAccount account) {
+        try {
+            databaseManager.update("UPDATE `banks` SET data='" + gson.toJson(account) + "' WHERE id='" + account.getBankId() + "';");
+        } catch (Exception exception) {
+            exception.printStackTrace(new PrintStream(System.err));
+        }
+    }
+
+    public void setNewPin(BankAccount account, int pin) {
+        account.setPin(pin);
+        updateBankAccount(account);
+    }
+
     public void addBalance(BankAccount account, double amount) {
-        final double currentBalance = account.getBalance();
-        final double newBalance = currentBalance + amount;
-
-        databaseManager.update("UPDATE `banks` SET `balance` = '" + newBalance + "' WHERE `id` = '" + account.getBankId() + "'; ");
+        account.setBalance(account.getBalance() + amount);
+        updateBankAccount(account);
     }
 
-    public void changePin(BankAccount account, Integer pin){
-        databaseManager.update("UPDATE `banks` SET `pin` = '" + pin + "' WHERE `id` = '" + account.getBankId() + "'; ");
+    public void removeBalance(BankAccount account, double amount) {
+        account.setBalance(account.getBalance() - amount);
+        updateBankAccount(account);
     }
 
-    public void removeBalance(BankAccount account, double amount){
-        final double currentBalance = account.getBalance();
-        final double newBalance = currentBalance - amount;
+    public void addTransaction(BankAccount account, TransactionType type, double amount, UUID player) {
+        account.getTransactions().add(new Transaction(type, amount, System.currentTimeMillis(), player));
 
-        databaseManager.update("UPDATE `banks` SET `balance` = '" + newBalance + "' WHERE `id` = '" + account.getBankId() + "'; ");
+        while (account.getTransactions().size() > 10)
+            account.getTransactions().removeFirst();
+
+        updateBankAccount(account);
     }
 
 }

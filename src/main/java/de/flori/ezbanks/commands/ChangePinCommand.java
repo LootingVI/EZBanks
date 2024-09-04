@@ -74,7 +74,7 @@ public class ChangePinCommand extends Command {
                     }
 
                     return List.of(
-                            SignGUIAction.run(() -> EZBanks.getInstance().getBankManager().changePin(bankAccount, Integer.parseInt(input))),
+                            SignGUIAction.run(() -> EZBanks.getInstance().getBankManager().setNewPin(bankAccount, Integer.parseInt(input))),
                             SignGUIAction.run(() -> player.sendMessage(EZBanks.getPrefix() + "§aYou have successfully changed the PIN to: §6" + input))
                     );
                 })

@@ -1,21 +1,25 @@
 package de.flori.ezbanks.manager.impl;
 
-import lombok.*;
+import com.google.common.collect.Lists;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+import java.util.List;
 import java.util.UUID;
 
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
 public class BankAccount {
 
     private String bankId;
     private UUID ownerUuid;
-
-    private double balance;
-
     private int pin;
-    private boolean suspended;
+
+    private double balance = 0;
+    private boolean suspended = false;
+
+    private List<Transaction> transactions = Lists.newArrayList();
 
 }

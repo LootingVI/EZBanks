@@ -41,12 +41,16 @@ public class BankCommand extends Command {
             final String bankId = UUID.randomUUID().toString().split("-")[0];
             final int pin = ThreadLocalRandom.current().nextInt(1000, 10000);
 
-            final BankAccount bankAccount = new BankAccount(bankId, player.getUniqueId(), 0, pin, false);
-            EZBanks.getInstance().getBankManager().createBankAccount(bankAccount);
+            final BankAccount account = new BankAccount();
+            account.setBankId(bankId);
+            account.setOwnerUuid(player.getUniqueId());
+            account.setPin(pin);
+
+            EZBanks.getInstance().getBankManager().createBankAccount(account);
 
             player.sendMessage(Component.text(EZBanks.getPrefix() + "§aYou have successfully created a new account. Your bank account pin is: " + pin));
             player.sendMessage(Component.text("§cBut remember them well! You can't access your bank account without it!"));
-            player.getInventory().addItem(ItemUtils.getBankCard(bankAccount));
+            player.getInventory().addItem(ItemUtils.getBankCard(account));
         }
         return true;
     }
