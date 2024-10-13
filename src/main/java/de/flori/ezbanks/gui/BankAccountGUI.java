@@ -154,23 +154,27 @@ public class BankAccountGUI implements InventoryHolder, Listener {
 
                                                 final int amountInt = Integer.parseInt(amount);
                                                 final double balance = account.getBalance();
+                                                if(amountInt < 0.1){
+                                                    p.sendMessage(Component.text(EZBanks.getPrefix() + "§cPlease enter a correct amount!"));
+                                                }else{
+                                                    if (amountInt > balance) {
+                                                        p1.sendMessage(Component.text(EZBanks.getPrefix() + "§cYou don't have enough money in your bank account!"));
+                                                        return List.of();
+                                                    }
 
-                                                if (amountInt > balance) {
-                                                    p1.sendMessage(Component.text(EZBanks.getPrefix() + "§cYou don't have enough money in your bank account!"));
+                                                    final Player targetPlayer = Bukkit.getPlayer(targetAccount.getOwnerUuid());
+                                                    if (targetPlayer != null) {
+                                                        targetPlayer.sendMessage(Component.text(EZBanks.getPrefix() + "§aYou have received a bank transfer from §b" + p1.getName() + "§a. Amount: §6" + amount + EZBanks.getInstance().getConfigManager().getSymbol()));
+                                                    }
+
+                                                    EZBanks.getInstance().getBankManager().removeBalance(account, amountInt);
+                                                    EZBanks.getInstance().getBankManager().addBalance(targetAccount, amountInt);
+                                                    EZBanks.getInstance().getBankManager().addTransaction(account, TransactionType.TRANSFER_OUT, amountInt, p.getUniqueId());
+                                                    EZBanks.getInstance().getBankManager().addTransaction(targetAccount, TransactionType.TRANSFER_IN, amountInt, p.getUniqueId());
+
+                                                    p1.sendMessage(Component.text(EZBanks.getPrefix() + "§aYou have successfully transferred §6" + amount + EZBanks.getInstance().getConfigManager().getSymbol() + " §ato §b" + Bukkit.getOfflinePlayer(targetAccount.getOwnerUuid()).getName()));
                                                     return List.of();
                                                 }
-
-                                                final Player targetPlayer = Bukkit.getPlayer(targetAccount.getOwnerUuid());
-                                                if (targetPlayer != null) {
-                                                    targetPlayer.sendMessage(Component.text(EZBanks.getPrefix() + "§aYou have received a bank transfer from §b" + p1.getName() + "§a. Amount: §6" + amount + EZBanks.getInstance().getConfigManager().getSymbol()));
-                                                }
-
-                                                EZBanks.getInstance().getBankManager().removeBalance(account, amountInt);
-                                                EZBanks.getInstance().getBankManager().addBalance(targetAccount, amountInt);
-                                                EZBanks.getInstance().getBankManager().addTransaction(account, TransactionType.TRANSFER_OUT, amountInt, p.getUniqueId());
-                                                EZBanks.getInstance().getBankManager().addTransaction(targetAccount, TransactionType.TRANSFER_IN, amountInt, p.getUniqueId());
-
-                                                p1.sendMessage(Component.text(EZBanks.getPrefix() + "§aYou have successfully transferred §6" + amount + EZBanks.getInstance().getConfigManager().getSymbol() + " §ato §b" + Bukkit.getOfflinePlayer(targetAccount.getOwnerUuid()).getName()));
                                                 return List.of();
                                             })
                                             .build();
@@ -198,17 +202,22 @@ public class BankAccountGUI implements InventoryHolder, Listener {
                                 final int amountInt = Integer.parseInt(amount);
                                 final double balance = account.getBalance();
 
-                                if (amountInt > balance) {
-                                    p.sendMessage(Component.text(EZBanks.getPrefix() + "§cYou don't have enough money in your bank account!"));
+                                if(amountInt < 0.1){
+                                   p.sendMessage(Component.text(EZBanks.getPrefix() + "§cPlease enter a correct amount!"));
+                                }else{
+                                    if (amountInt > balance) {
+                                        p.sendMessage(Component.text(EZBanks.getPrefix() + "§cYou don't have enough money in your bank account!"));
+                                        return List.of();
+                                    }
+
+                                    EZBanks.getInstance().getBankManager().removeBalance(account, amountInt);
+                                    EZBanks.getInstance().getEconomy().depositPlayer(p, amountInt);
+
+                                    EZBanks.getInstance().getBankManager().addTransaction(account, TransactionType.REMOVE_MONEY, amountInt, p.getUniqueId());
+
+                                    p.sendMessage(Component.text(EZBanks.getPrefix() + "§aYou have successfully withdrawn §6" + amount + EZBanks.getInstance().getConfigManager().getSymbol()));
                                     return List.of();
                                 }
-
-                                EZBanks.getInstance().getBankManager().removeBalance(account, amountInt);
-                                EZBanks.getInstance().getEconomy().depositPlayer(p, amountInt);
-
-                                EZBanks.getInstance().getBankManager().addTransaction(account, TransactionType.REMOVE_MONEY, amountInt, p.getUniqueId());
-
-                                p.sendMessage(Component.text(EZBanks.getPrefix() + "§aYou have successfully withdrawn §6" + amount + EZBanks.getInstance().getConfigManager().getSymbol()));
                                 return List.of();
                             })
                             .build();
@@ -231,17 +240,22 @@ public class BankAccountGUI implements InventoryHolder, Listener {
                                 final int amountInt = Integer.parseInt(amount);
                                 final double balance = EZBanks.getInstance().getEconomy().getBalance(p);
 
-                                if (amountInt > balance) {
-                                    p.sendMessage(Component.text(EZBanks.getPrefix() + "§cYou don't have enough money in your inventory!"));
+                                if(amountInt < 0.1){
+                                    p.sendMessage(Component.text(EZBanks.getPrefix() + "§cPlease enter a correct amount!"));
+                                }else{
+                                    if (amountInt > balance) {
+                                        p.sendMessage(Component.text(EZBanks.getPrefix() + "§cYou don't have enough money in your inventory!"));
+                                        return List.of();
+                                    }
+
+                                    EZBanks.getInstance().getBankManager().addBalance(account, amountInt);
+                                    EZBanks.getInstance().getEconomy().withdrawPlayer(p, amountInt);
+
+                                    EZBanks.getInstance().getBankManager().addTransaction(account, TransactionType.ADD_MONEY, amountInt, p.getUniqueId());
+
+                                    p.sendMessage(Component.text(EZBanks.getPrefix() + "§aYou have successfully deposited §6" + amount + EZBanks.getInstance().getConfigManager().getSymbol()));
                                     return List.of();
                                 }
-
-                                EZBanks.getInstance().getBankManager().addBalance(account, amountInt);
-                                EZBanks.getInstance().getEconomy().withdrawPlayer(p, amountInt);
-
-                                EZBanks.getInstance().getBankManager().addTransaction(account, TransactionType.ADD_MONEY, amountInt, p.getUniqueId());
-
-                                p.sendMessage(Component.text(EZBanks.getPrefix() + "§aYou have successfully deposited §6" + amount + EZBanks.getInstance().getConfigManager().getSymbol()));
                                 return List.of();
                             })
                             .build();

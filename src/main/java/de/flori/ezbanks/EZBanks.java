@@ -8,6 +8,7 @@ import de.flori.ezbanks.database.DatabaseManager;
 import de.flori.ezbanks.gui.BankAccountGUI;
 import de.flori.ezbanks.gui.BankMenuGUI;
 import de.flori.ezbanks.gui.BuyCardGUI;
+import de.flori.ezbanks.gui.BuybankAccountGUI;
 import de.flori.ezbanks.manager.BankManager;
 import lombok.Getter;
 import net.milkbowl.vault.economy.Economy;
@@ -33,14 +34,18 @@ public final class EZBanks extends JavaPlugin {
 
         getLogger().severe("EZBanks - Remember, this is the first alpha of the plugin it does not contain all functions yet! If you find any bugs please let me know on SpigotMC.");
 
-        if (!setupEconomy()) {
-            getLogger().severe("Vault not found! Disabling plugin...");
-            getServer().getPluginManager().disablePlugin(this);
-            return;
-        }
+        //if (!setupEconomy()) {
+            //getLogger().severe("Vault not found! Disabling plugin...");
+            //getServer().getPluginManager().disablePlugin(this);
+            //return;
+        //}
+
+        final RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
+
+        economy = rsp.getProvider();
 
         configManager = new ConfigManager();
-        if (!configManager.existsConfig()) configManager.createMYSQConfig();
+        if (!configManager.existsConfig()) configManager.createConfig();
 
         databaseManager = new DatabaseManager(configManager.getDBHost(), configManager.getDBPort(), configManager.getDBUsername(), configManager.getDBPassword(), configManager.getDBDatabase(), "EZBank");
         bankManager = new BankManager();
@@ -61,10 +66,11 @@ public final class EZBanks extends JavaPlugin {
         manager.registerEvents(new BankAccountGUI(), this);
         manager.registerEvents(new BankMenuGUI(), this);
         manager.registerEvents(new BuyCardGUI(), this);
+        manager.registerEvents(new BuybankAccountGUI(), this);
     }
 
     private boolean setupEconomy() {
-        if (getServer().getPluginManager().getPlugin("Vault") == null) return false;
+        //if (getServer().getPluginManager().getPlugin("Vault") == null) return false;
 
         final RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
         if (rsp == null) return false;

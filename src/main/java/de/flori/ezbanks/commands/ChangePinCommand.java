@@ -59,7 +59,7 @@ public class ChangePinCommand extends Command {
                     final String input = result.getLineWithoutColor(0);
 
                     if (input.isEmpty()) {
-                        p.sendMessage(EZBanks.getPrefix() + "§cPlease enter a correct amount!");
+                        p.sendMessage(EZBanks.getPrefix() + "§cPlease enter a correct PIN!");
                         return Collections.emptyList();
                     }
 

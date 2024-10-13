@@ -3,6 +3,7 @@ package de.flori.ezbanks.commands;
 import de.flori.ezbanks.EZBanks;
 import de.flori.ezbanks.gui.BankMenuGUI;
 import de.flori.ezbanks.gui.BuyCardGUI;
+import de.flori.ezbanks.gui.BuybankAccountGUI;
 import de.flori.ezbanks.manager.impl.BankAccount;
 import de.flori.ezbanks.utils.ItemUtils;
 import net.kyori.adventure.text.Component;
@@ -38,19 +39,24 @@ public class BankCommand extends Command {
                 }
             }
         } else {
-            final String bankId = UUID.randomUUID().toString().split("-")[0];
-            final int pin = ThreadLocalRandom.current().nextInt(1000, 10000);
+            if(EZBanks.getInstance().getConfigManager().getBankCost() != 0){
+                player.openInventory(new BuybankAccountGUI().getInventory());
+            }else{
+                final String bankId = UUID.randomUUID().toString().split("-")[0];
+                final int pin = ThreadLocalRandom.current().nextInt(1000, 10000);
 
-            final BankAccount account = new BankAccount();
-            account.setBankId(bankId);
-            account.setOwnerUuid(player.getUniqueId());
-            account.setPin(pin);
+                final BankAccount account = new BankAccount();
+                account.setBankId(bankId);
+                account.setOwnerUuid(player.getUniqueId());
+                account.setPin(pin);
 
-            EZBanks.getInstance().getBankManager().createBankAccount(account);
+                EZBanks.getInstance().getBankManager().createBankAccount(account);
 
-            player.sendMessage(Component.text(EZBanks.getPrefix() + "§aYou have successfully created a new account. Your bank account pin is: " + pin));
-            player.sendMessage(Component.text("§cBut remember them well! You can't access your bank account without it!"));
-            player.getInventory().addItem(ItemUtils.getBankCard(account));
+                player.sendMessage(Component.text(EZBanks.getPrefix() + "§aYou have successfully created a new account. Your bank account pin is: " + pin));
+                player.sendMessage(Component.text("§cBut remember them well! You can't access your bank account without it!"));
+                player.getInventory().addItem(ItemUtils.getBankCard(account));
+            }
+
         }
         return true;
     }
