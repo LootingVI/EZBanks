@@ -2,7 +2,7 @@
 
 ## **The first ever Plugin that supports 💳 Card based trading!**
 
-Join our discord [EZ-Development](https://discord.gg/k4knhZrTYt":)")
+Join our discord [EZ-Development](https://discord.gg/k4knhZrTYt)
 
 ```/bankhelp``` to see a list of commands ingame
 
