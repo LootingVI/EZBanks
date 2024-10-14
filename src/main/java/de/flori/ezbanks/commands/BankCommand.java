@@ -7,6 +7,7 @@ import de.flori.ezbanks.gui.BuybankAccountGUI;
 import de.flori.ezbanks.manager.impl.BankAccount;
 import de.flori.ezbanks.utils.ItemUtils;
 import net.kyori.adventure.text.Component;
+import org.bukkit.Sound;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -30,12 +31,15 @@ public class BankCommand extends Command {
         if (EZBanks.getInstance().getBankManager().hasBankAccount(player.getUniqueId())) {
             if (!ItemUtils.hasBankCard(player)) {
                 player.openInventory(new BuyCardGUI().getInventory());
+                player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_HURT, 1.0f, 1.0f);
             } else {
                 final ItemStack itemStack = player.getInventory().getItemInMainHand();
                 if (ItemUtils.isBankCard(itemStack)) {
                     player.openInventory(new BankMenuGUI().getInventory());
+                    player.playSound(player.getLocation(), Sound.BLOCK_CHEST_OPEN, 1.0f, 1.0f);
                 } else {
                     player.sendMessage(Component.text(EZBanks.getPrefix() + "§cNo bank card recognised! Please hold a bank card in your hand."));
+                    player.playSound(player.getLocation(), Sound.ITEM_OMINOUS_BOTTLE_DISPOSE, 1.0f, 1.0f);
                 }
             }
         } else {
@@ -51,6 +55,7 @@ public class BankCommand extends Command {
                 account.setPin(pin);
 
                 EZBanks.getInstance().getBankManager().createBankAccount(account);
+                player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f);
 
                 player.sendMessage(Component.text(EZBanks.getPrefix() + "§aYou have successfully created a new account. Your bank account pin is: " + pin));
                 player.sendMessage(Component.text("§cBut remember them well! You can't access your bank account without it!"));

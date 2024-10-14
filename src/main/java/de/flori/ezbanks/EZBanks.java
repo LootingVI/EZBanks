@@ -5,6 +5,7 @@ import de.flori.ezbanks.commands.ChangePinCommand;
 import de.flori.ezbanks.commands.HelpCommand;
 import de.flori.ezbanks.config.ConfigManager;
 import de.flori.ezbanks.database.DatabaseManager;
+import de.flori.ezbanks.events.PlayerInteractEvent;
 import de.flori.ezbanks.gui.BankAccountGUI;
 import de.flori.ezbanks.gui.BankMenuGUI;
 import de.flori.ezbanks.gui.BuyCardGUI;
@@ -27,10 +28,12 @@ public final class EZBanks extends JavaPlugin {
     private DatabaseManager databaseManager;
     private BankManager bankManager;
     private Economy economy;
+    private static final String SPIGOT_RESOURCE_ID = "119092";
 
     @Override
     public void onEnable() {
         instance = this;
+
 
         getLogger().severe("EZBanks - Remember, this is the first alpha of the plugin it does not contain all functions yet! If you find any bugs please let me know on SpigotMC.");
 
@@ -46,6 +49,7 @@ public final class EZBanks extends JavaPlugin {
 
         configManager = new ConfigManager();
         if (!configManager.existsConfig()) configManager.createConfig();
+
 
         databaseManager = new DatabaseManager(configManager.getDBHost(), configManager.getDBPort(), configManager.getDBUsername(), configManager.getDBPassword(), configManager.getDBDatabase(), "EZBank");
         bankManager = new BankManager();
@@ -67,6 +71,7 @@ public final class EZBanks extends JavaPlugin {
         manager.registerEvents(new BankMenuGUI(), this);
         manager.registerEvents(new BuyCardGUI(), this);
         manager.registerEvents(new BuybankAccountGUI(), this);
+        manager.registerEvents(new PlayerInteractEvent(), this);
     }
 
     private boolean setupEconomy() {

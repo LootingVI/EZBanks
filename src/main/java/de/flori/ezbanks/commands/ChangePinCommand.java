@@ -9,6 +9,7 @@ import de.rapha149.signgui.SignGUIAction;
 import net.kyori.adventure.text.Component;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -30,11 +31,13 @@ public class ChangePinCommand extends Command {
 
         if (!ItemUtils.isBankCard(player.getInventory().getItemInMainHand())) {
             player.sendMessage(Component.text(EZBanks.getPrefix() + "§cYou must hold a bank card in your hand to change the pin."));
+            player.playSound(player.getLocation(), Sound.ITEM_OMINOUS_BOTTLE_DISPOSE, 1.0f, 1.0f);
             return false;
         }
 
         if (!EZBanks.getInstance().getBankManager().hasBankAccount(player.getUniqueId())) {
             player.sendMessage(Component.text(EZBanks.getPrefix() + "§cYou do not have a bank account."));
+            player.playSound(player.getLocation(), Sound.ITEM_OMINOUS_BOTTLE_DISPOSE, 1.0f, 1.0f);
             return false;
         }
 
@@ -43,11 +46,13 @@ public class ChangePinCommand extends Command {
 
         if (bankAccount == null) {
             player.sendMessage(Component.text(EZBanks.getPrefix() + "§cThe bank account could not be found."));
+            player.playSound(player.getLocation(), Sound.ITEM_OMINOUS_BOTTLE_DISPOSE, 1.0f, 1.0f);
             return false;
         }
 
         if (!bankAccount.getOwnerUuid().equals(player.getUniqueId())) {
             player.sendMessage(Component.text(EZBanks.getPrefix() + "§cYou can only change the pin of your own bank account."));
+            player.playSound(player.getLocation(), Sound.ITEM_OMINOUS_BOTTLE_DISPOSE, 1.0f, 1.0f);
             return false;
         }
 
@@ -60,20 +65,24 @@ public class ChangePinCommand extends Command {
 
                     if (input.isEmpty()) {
                         p.sendMessage(EZBanks.getPrefix() + "§cPlease enter a correct PIN!");
+                        player.playSound(player.getLocation(), Sound.ITEM_OMINOUS_BOTTLE_DISPOSE, 1.0f, 1.0f);
                         return Collections.emptyList();
                     }
 
                     if (!MessageUtils.isValidInteger(input)) {
                         p.sendMessage(EZBanks.getPrefix() + "§cThe PIN must be a number.");
+                        player.playSound(player.getLocation(), Sound.ITEM_OMINOUS_BOTTLE_DISPOSE, 1.0f, 1.0f);
                         return Collections.emptyList();
                     }
 
                     if (input.length() != 4) {
                         p.sendMessage(EZBanks.getPrefix() + "§cThe PIN must be exactly 4 digits long.");
+                        player.playSound(player.getLocation(), Sound.ITEM_OMINOUS_BOTTLE_DISPOSE, 1.0f, 1.0f);
                         return Collections.emptyList();
                     }
 
                     return List.of(
+                            SignGUIAction.run(() -> player.playSound(player.getLocation(), Sound.ITEM_BOOK_PAGE_TURN, 1.0f, 1.0f)),
                             SignGUIAction.run(() -> EZBanks.getInstance().getBankManager().setNewPin(bankAccount, Integer.parseInt(input))),
                             SignGUIAction.run(() -> player.sendMessage(EZBanks.getPrefix() + "§aYou have successfully changed the PIN to: §6" + input))
                     );

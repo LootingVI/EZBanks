@@ -7,6 +7,7 @@ import de.flori.ezbanks.utils.ItemUtils;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -49,6 +50,7 @@ public class BuyCardGUI implements InventoryHolder, Listener {
 
             if (!EZBanks.getInstance().getBankManager().hasBankAccount(player.getUniqueId())) {
                 player.sendMessage(Component.text(EZBanks.getPrefix() + "§cYou do not have a bank account."));
+                player.playSound(player.getLocation(), Sound.ITEM_OMINOUS_BOTTLE_DISPOSE, 1.0f, 1.0f);
                 return;
             }
 
@@ -57,10 +59,13 @@ public class BuyCardGUI implements InventoryHolder, Listener {
 
             if (balance < cardCost) {
                 player.sendMessage(Component.text(EZBanks.getPrefix() + "§cYou don't have enough money to buy a new card."));
+                player.playSound(player.getLocation(), Sound.ITEM_OMINOUS_BOTTLE_DISPOSE, 1.0f, 1.0f);
                 return;
             }
 
             EZBanks.getInstance().getEconomy().withdrawPlayer(player, cardCost);
+
+            player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f);
 
             final BankAccount bankAccount = EZBanks.getInstance().getBankManager().getBankAccount(player.getUniqueId());
             player.getInventory().addItem(ItemUtils.getBankCard(bankAccount));

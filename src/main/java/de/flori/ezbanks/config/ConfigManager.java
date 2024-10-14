@@ -25,6 +25,11 @@ public class ConfigManager {
         return EZBanks.getInstance().getConfig().getString("prefix");
     }
 
+    public boolean isAutoUpdateEnable(){
+        return EZBanks.getInstance().getConfig().getBoolean("auto_update");
+    }
+
+
     public Integer getBankCost(){
         return  EZBanks.getInstance().getConfig().getInt("bank_account_cost");
     }

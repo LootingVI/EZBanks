@@ -14,6 +14,7 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -113,6 +114,7 @@ public class BankAccountGUI implements InventoryHolder, Listener {
             final ItemStack bankCardItemStack = player.getInventory().getItemInMainHand();
             if (!ItemUtils.isBankCard(bankCardItemStack)) {
                 player.sendMessage(Component.text(EZBanks.getPrefix() + "§cNo bank card recognised! Please hold a bank card in your hand while using the bank menu."));
+                player.playSound(player.getLocation(), Sound.ITEM_OMINOUS_BOTTLE_DISPOSE, 0.0f, 1.0f);
                 return;
             }
 
@@ -129,6 +131,7 @@ public class BankAccountGUI implements InventoryHolder, Listener {
 
                                 if (targetBankId.isEmpty()) {
                                     p.sendMessage(Component.text(EZBanks.getPrefix() + "§cPlease enter a correct bank id!"));
+                                    player.playSound(player.getLocation(), Sound.ITEM_OMINOUS_BOTTLE_DISPOSE, 1.0f, 1.0f);
                                     return List.of();
                                 }
 
@@ -136,6 +139,7 @@ public class BankAccountGUI implements InventoryHolder, Listener {
 
                                 if (targetAccount == null) {
                                     p.sendMessage(Component.text(EZBanks.getPrefix() + "§cBank account not found!"));
+                                    player.playSound(player.getLocation(), Sound.ITEM_OMINOUS_BOTTLE_DISPOSE, 1.0f, 1.0f);
                                     return List.of();
                                 }
 
@@ -149,6 +153,7 @@ public class BankAccountGUI implements InventoryHolder, Listener {
 
                                                 if (amount.isEmpty() || !MessageUtils.isValidInteger(amount)) {
                                                     p1.sendMessage(Component.text(EZBanks.getPrefix() + "§cPlease enter a correct amount!"));
+                                                    player.playSound(player.getLocation(), Sound.ITEM_OMINOUS_BOTTLE_DISPOSE, 1.0f, 1.0f);
                                                     return List.of();
                                                 }
 
@@ -156,9 +161,11 @@ public class BankAccountGUI implements InventoryHolder, Listener {
                                                 final double balance = account.getBalance();
                                                 if(amountInt < 0.1){
                                                     p.sendMessage(Component.text(EZBanks.getPrefix() + "§cPlease enter a correct amount!"));
+                                                    player.playSound(player.getLocation(), Sound.ITEM_OMINOUS_BOTTLE_DISPOSE, 1.0f, 1.0f);
                                                 }else{
                                                     if (amountInt > balance) {
                                                         p1.sendMessage(Component.text(EZBanks.getPrefix() + "§cYou don't have enough money in your bank account!"));
+                                                        player.playSound(player.getLocation(), Sound.ITEM_OMINOUS_BOTTLE_DISPOSE, 1.0f, 1.0f);
                                                         return List.of();
                                                     }
 
@@ -171,6 +178,7 @@ public class BankAccountGUI implements InventoryHolder, Listener {
                                                     EZBanks.getInstance().getBankManager().addBalance(targetAccount, amountInt);
                                                     EZBanks.getInstance().getBankManager().addTransaction(account, TransactionType.TRANSFER_OUT, amountInt, p.getUniqueId());
                                                     EZBanks.getInstance().getBankManager().addTransaction(targetAccount, TransactionType.TRANSFER_IN, amountInt, p.getUniqueId());
+                                                    player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.0f);
 
                                                     p1.sendMessage(Component.text(EZBanks.getPrefix() + "§aYou have successfully transferred §6" + amount + EZBanks.getInstance().getConfigManager().getSymbol() + " §ato §b" + Bukkit.getOfflinePlayer(targetAccount.getOwnerUuid()).getName()));
                                                     return List.of();
@@ -196,6 +204,7 @@ public class BankAccountGUI implements InventoryHolder, Listener {
 
                                 if (amount.isEmpty() || !MessageUtils.isValidInteger(amount)) {
                                     p.sendMessage(Component.text(EZBanks.getPrefix() + "§cPlease enter a correct amount!"));
+                                    player.playSound(player.getLocation(), Sound.ITEM_OMINOUS_BOTTLE_DISPOSE, 1.0f, 1.0f);
                                     return List.of();
                                 }
 
@@ -204,14 +213,17 @@ public class BankAccountGUI implements InventoryHolder, Listener {
 
                                 if(amountInt < 0.1){
                                    p.sendMessage(Component.text(EZBanks.getPrefix() + "§cPlease enter a correct amount!"));
+                                    player.playSound(player.getLocation(), Sound.ITEM_OMINOUS_BOTTLE_DISPOSE, 1.0f, 1.0f);
                                 }else{
                                     if (amountInt > balance) {
                                         p.sendMessage(Component.text(EZBanks.getPrefix() + "§cYou don't have enough money in your bank account!"));
+                                        player.playSound(player.getLocation(), Sound.ITEM_OMINOUS_BOTTLE_DISPOSE, 1.0f, 1.0f);
                                         return List.of();
                                     }
 
                                     EZBanks.getInstance().getBankManager().removeBalance(account, amountInt);
                                     EZBanks.getInstance().getEconomy().depositPlayer(p, amountInt);
+                                    player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.0f);
 
                                     EZBanks.getInstance().getBankManager().addTransaction(account, TransactionType.REMOVE_MONEY, amountInt, p.getUniqueId());
 
@@ -234,6 +246,7 @@ public class BankAccountGUI implements InventoryHolder, Listener {
 
                                 if (amount.isEmpty() || !MessageUtils.isValidInteger(amount)) {
                                     p.sendMessage(Component.text(EZBanks.getPrefix() + "§cPlease enter a correct amount!"));
+                                    player.playSound(player.getLocation(), Sound.ITEM_OMINOUS_BOTTLE_DISPOSE, 1.0f, 1.0f);
                                     return List.of();
                                 }
 
@@ -242,9 +255,11 @@ public class BankAccountGUI implements InventoryHolder, Listener {
 
                                 if(amountInt < 0.1){
                                     p.sendMessage(Component.text(EZBanks.getPrefix() + "§cPlease enter a correct amount!"));
+                                    player.playSound(player.getLocation(), Sound.ITEM_OMINOUS_BOTTLE_DISPOSE, 1.0f, 1.0f);
                                 }else{
                                     if (amountInt > balance) {
                                         p.sendMessage(Component.text(EZBanks.getPrefix() + "§cYou don't have enough money in your inventory!"));
+                                        player.playSound(player.getLocation(), Sound.ITEM_OMINOUS_BOTTLE_DISPOSE, 1.0f, 1.0f);
                                         return List.of();
                                     }
 
@@ -252,6 +267,7 @@ public class BankAccountGUI implements InventoryHolder, Listener {
                                     EZBanks.getInstance().getEconomy().withdrawPlayer(p, amountInt);
 
                                     EZBanks.getInstance().getBankManager().addTransaction(account, TransactionType.ADD_MONEY, amountInt, p.getUniqueId());
+                                    player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.0f);
 
                                     p.sendMessage(Component.text(EZBanks.getPrefix() + "§aYou have successfully deposited §6" + amount + EZBanks.getInstance().getConfigManager().getSymbol()));
                                     return List.of();

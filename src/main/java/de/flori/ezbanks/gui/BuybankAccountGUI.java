@@ -7,6 +7,7 @@ import de.flori.ezbanks.utils.ItemUtils;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -24,7 +25,7 @@ public class BuybankAccountGUI implements InventoryHolder, Listener {
     private final Inventory inventory;
 
     public BuybankAccountGUI() {
-        this.inventory = Bukkit.createInventory(this, 45, Component.text("§cNew card"));
+        this.inventory = Bukkit.createInventory(this, 45, Component.text("§cNew account"));
     }
 
     @Override
@@ -41,7 +42,7 @@ public class BuybankAccountGUI implements InventoryHolder, Listener {
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
         try {
-            if (!(event.getInventory().getHolder() instanceof BuyCardGUI)) return;
+            if (!(event.getInventory().getHolder() instanceof BuybankAccountGUI)) return;
             event.setCancelled(true);
 
             final ItemStack item = event.getCurrentItem();
@@ -56,6 +57,7 @@ public class BuybankAccountGUI implements InventoryHolder, Listener {
 
             if (balance < accost) {
                 player.sendMessage(Component.text(EZBanks.getPrefix() + "§cYou don't have enough money to buy a bank account."));
+                player.playSound(player.getLocation(), Sound.ITEM_OMINOUS_BOTTLE_DISPOSE, 1.0f, 1.0f);
                 return;
             }
 
@@ -69,9 +71,13 @@ public class BuybankAccountGUI implements InventoryHolder, Listener {
             account.setOwnerUuid(player.getUniqueId());
             account.setPin(pin);
 
+            EZBanks.getInstance().getBankManager().createBankAccount(account);
+            player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f);
+
             player.sendMessage(Component.text(EZBanks.getPrefix() + "§aYou have successfully created a new account. Your bank account pin is: " + pin));
             player.sendMessage(Component.text("§cBut remember them well! You can't access your bank account without it!"));
             player.getInventory().addItem(ItemUtils.getBankCard(account));
+            player.getInventory().close();
         } catch (NullPointerException ignored) {}
     }
 

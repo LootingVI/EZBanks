@@ -6,7 +6,7 @@
 
     <groupId>de.flori</groupId>
     <artifactId>EZBanks</artifactId>
-    <version>0.6.1-ALPHA</version>
+    <version>0.6.2-ALPHA</version>
     <packaging>jar</packaging>
 
     <name>EZBanks</name>
@@ -88,6 +88,10 @@
         <repository>
             <id>jitpack.io</id>
             <url>https://jitpack.io</url>
+        </repository>
+        <repository>
+            <id>jeff-media-public</id>
+            <url>https://repo.jeff-media.com/public/</url>
         </repository>
         <repository>
             <id>papermc-repo</id>

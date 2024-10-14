@@ -10,6 +10,7 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -60,6 +61,7 @@ public class BankMenuGUI implements InventoryHolder, Listener {
                     final ItemStack itemStack = player.getInventory().getItemInMainHand();
                     if (!ItemUtils.isBankCard(itemStack)) {
                         player.sendMessage(Component.text(EZBanks.getPrefix() + "§cNo bank card recognised! Please hold a bank card in your hand."));
+                        player.playSound(player.getLocation(), Sound.ITEM_OMINOUS_BOTTLE_DISPOSE, 1.0f, 1.0f);
                         return;
                     }
 
@@ -68,6 +70,7 @@ public class BankMenuGUI implements InventoryHolder, Listener {
 
                     if (account == null) {
                         player.sendMessage(Component.text(EZBanks.getPrefix() + "§cThis bank account does not exist anymore."));
+                        player.playSound(player.getLocation(), Sound.ITEM_OMINOUS_BOTTLE_DISPOSE, 1.0f, 1.0f);
                         return;
                     }
 
@@ -81,9 +84,10 @@ public class BankMenuGUI implements InventoryHolder, Listener {
 
                                 if (!input.equals(String.valueOf(pin))) {
                                     p.sendMessage(EZBanks.getPrefix() + "§cThe PIN you entered is incorrect.");
+                                    player.playSound(player.getLocation(), Sound.ITEM_OMINOUS_BOTTLE_DISPOSE, 1.0f, 1.0f);
                                     return List.of();
                                 }
-
+                                player.playSound(player.getLocation(), Sound.BLOCK_CHEST_OPEN, 1.0f, 1.0f);
                                 return List.of(SignGUIAction.openInventory(EZBanks.getInstance(), new BankAccountGUI(account).getInventory()));
                             })
                             .build();
