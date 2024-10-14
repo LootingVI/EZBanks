@@ -7,3 +7,7 @@ Join our discord [EZ-Development](https://discord.gg/aFKtmjAVxT ":)")
 ```/bankhelp``` to see a list of commands ingame
 
 (requires Vault and Economy Plugin)
+
+Some stuff:
+Some utils classes are from: https://github.com/HttpMarco/osgan
+Sign gui are from: https://github.com/Rapha149/SignGUI
