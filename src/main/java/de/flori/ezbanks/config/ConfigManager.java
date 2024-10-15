@@ -14,6 +14,7 @@ public class ConfigManager {
         EZBanks.getInstance().getConfig().set("currency_symbol", "$");
         EZBanks.getInstance().getConfig().set("new_card_cost", 1000);
         EZBanks.getInstance().getConfig().set("bank_account_cost", 0);
+        EZBanks.getInstance().getConfig().set("send_anonym_data", true);
         EZBanks.getInstance().saveConfig();
     }
 
@@ -21,12 +22,17 @@ public class ConfigManager {
         return EZBanks.getInstance().getConfig().getString("MYSQL.ip") != null;
     }
 
+    public boolean existsSendData(){
+        return EZBanks.getInstance().getConfig().getString("send_anonym_data") != null;
+    }
+
+
     public String getPrefix(){
         return EZBanks.getInstance().getConfig().getString("prefix");
     }
 
-    public boolean isAutoUpdateEnable(){
-        return EZBanks.getInstance().getConfig().getBoolean("auto_update");
+    public boolean isSendDataEnable(){
+        return EZBanks.getInstance().getConfig().getBoolean("send_anonym_data");
     }
 
 

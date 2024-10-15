@@ -13,6 +13,7 @@ import org.bukkit.Sound;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
@@ -53,6 +54,13 @@ public class ChangePinCommand extends Command {
         if (!bankAccount.getOwnerUuid().equals(player.getUniqueId())) {
             player.sendMessage(Component.text(EZBanks.getPrefix() + "§cYou can only change the pin of your own bank account."));
             player.playSound(player.getLocation(), Sound.ITEM_OMINOUS_BOTTLE_DISPOSE, 1.0f, 1.0f);
+            return false;
+        }
+
+        final ItemStack itemStack = player.getInventory().getItemInMainHand();
+        final BankAccount account = EZBanks.getInstance().getBankManager().getBankAccount(ItemUtils.getBankId(itemStack));
+        if(account.isSuspended()){
+            player.sendMessage(EZBanks.getPrefix() + "§cAccess to this account is blocked!");
             return false;
         }
 

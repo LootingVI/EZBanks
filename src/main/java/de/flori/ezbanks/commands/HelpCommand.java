@@ -19,6 +19,7 @@ public class HelpCommand extends Command {
 
         player.sendMessage(Component.text("§c/bank §8- §7Opens Bank GUI"));
         player.sendMessage(Component.text("§c/setpin §8- §7Allows you to change your pin (only works on your own card)"));
+        player.sendMessage(Component.text("§c/bank-suspend §8- Allows to suspend/unsuspend bank accounts"));
         return true;
     }
 

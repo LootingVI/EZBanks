@@ -34,7 +34,15 @@ public class BankCommand extends Command {
                 player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_HURT, 1.0f, 1.0f);
             } else {
                 final ItemStack itemStack = player.getInventory().getItemInMainHand();
+                final BankAccount account = EZBanks.getInstance().getBankManager().getBankAccount(ItemUtils.getBankId(itemStack));
                 if (ItemUtils.isBankCard(itemStack)) {
+
+                    if(account.isSuspended()){
+                        player.sendMessage(EZBanks.getPrefix() + "§cAccess to this account is blocked!");
+                        player.playSound(player.getLocation(), Sound.ITEM_OMINOUS_BOTTLE_DISPOSE, 1.0f, 1.0f);
+                        return false;
+                    }
+
                     player.openInventory(new BankMenuGUI().getInventory());
                     player.playSound(player.getLocation(), Sound.BLOCK_CHEST_OPEN, 1.0f, 1.0f);
                 } else {

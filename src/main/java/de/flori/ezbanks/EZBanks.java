@@ -3,6 +3,7 @@ package de.flori.ezbanks;
 import de.flori.ezbanks.commands.BankCommand;
 import de.flori.ezbanks.commands.ChangePinCommand;
 import de.flori.ezbanks.commands.HelpCommand;
+import de.flori.ezbanks.commands.SuspendCommand;
 import de.flori.ezbanks.config.ConfigManager;
 import de.flori.ezbanks.database.DatabaseManager;
 import de.flori.ezbanks.events.PlayerInteractEvent;
@@ -13,6 +14,8 @@ import de.flori.ezbanks.gui.BuybankAccountGUI;
 import de.flori.ezbanks.manager.BankManager;
 import lombok.Getter;
 import net.milkbowl.vault.economy.Economy;
+import org.bstats.bukkit.Metrics;
+import org.bstats.charts.SimplePie;
 import org.bukkit.command.CommandMap;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
@@ -34,7 +37,7 @@ public final class EZBanks extends JavaPlugin {
     public void onEnable() {
         instance = this;
 
-
+        getLogger().severe("EZBanks - Support Discord Server: https://discord.gg/k4knhZrTYt");
         getLogger().severe("EZBanks - Remember, this is the first alpha of the plugin it does not contain all functions yet! If you find any bugs please let me know on SpigotMC.");
 
         //if (!setupEconomy()) {
@@ -54,6 +57,19 @@ public final class EZBanks extends JavaPlugin {
         databaseManager = new DatabaseManager(configManager.getDBHost(), configManager.getDBPort(), configManager.getDBUsername(), configManager.getDBPassword(), configManager.getDBDatabase(), "EZBank");
         bankManager = new BankManager();
 
+
+        if(!EZBanks.getInstance().getConfigManager().existsSendData()){
+            EZBanks.getInstance().getConfig().set("send_anonym_data", true);
+            EZBanks.getInstance().saveConfig();
+        }
+
+        if(EZBanks.getInstance().getConfigManager().isSendDataEnable()){
+            int pluginId = 23630;
+            new Metrics(this, pluginId);
+            getLogger().severe("EZBanks - Sending of anonymous statistics to bStats successful");
+        }
+
+
         registerCommands();
         registerListeners();
     }
@@ -63,6 +79,7 @@ public final class EZBanks extends JavaPlugin {
         commandMap.register("bank", new BankCommand());
         commandMap.register("setpin", new ChangePinCommand());
         commandMap.register("bankhelp", new HelpCommand());
+        commandMap.register("bank-suspend", new SuspendCommand());
     }
 
     private void registerListeners() {

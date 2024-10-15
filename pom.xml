@@ -6,7 +6,7 @@
 
     <groupId>de.flori</groupId>
     <artifactId>EZBanks</artifactId>
-    <version>0.6.2-ALPHA</version>
+    <version>0.6.3-ALPHA</version>
     <packaging>jar</packaging>
 
     <name>EZBanks</name>
@@ -56,6 +56,10 @@
                                 <relocation>
                                     <pattern>de.rapha149.signgui</pattern>
                                     <shadedPattern>de.flori.ezbanks.utils</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.bstats</pattern>
+                                    <shadedPattern>de.flori.ezbanks.utils.bstats</shadedPattern>
                                 </relocation>
                             </relocations>
                         </configuration>
@@ -114,6 +118,12 @@
             <groupId>com.zaxxer</groupId>
             <artifactId>HikariCP</artifactId>
             <version>5.1.0</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.bstats</groupId>
+            <artifactId>bstats-bukkit</artifactId>
+            <version>3.0.2</version>
             <scope>compile</scope>
         </dependency>
         <dependency>

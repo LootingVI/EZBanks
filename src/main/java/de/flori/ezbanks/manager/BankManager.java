@@ -88,4 +88,12 @@ public class BankManager {
         updateBankAccount(account);
     }
 
+    public void setSuspended(BankAccount account, boolean in){
+        account.setSuspended(in);
+
+        updateBankAccount(account);
+    }
+
+
+
 }

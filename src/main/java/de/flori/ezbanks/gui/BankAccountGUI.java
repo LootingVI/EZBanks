@@ -119,7 +119,6 @@ public class BankAccountGUI implements InventoryHolder, Listener {
             }
 
             final BankAccount account = EZBanks.getInstance().getBankManager().getBankAccount(ItemUtils.getBankId(bankCardItemStack));
-
             switch (item.getType()) {
                 case ARROW -> {
                     final SignGUI bankIdGui = SignGUI.builder()

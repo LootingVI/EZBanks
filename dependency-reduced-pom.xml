@@ -4,7 +4,7 @@
   <groupId>de.flori</groupId>
   <artifactId>EZBanks</artifactId>
   <name>EZBanks</name>
-  <version>0.5.0-ALPHA</version>
+  <version>0.6.3-ALPHA</version>
   <build>
     <resources>
       <resource>
@@ -19,19 +19,14 @@
         <configuration>
           <source>${java.version}</source>
           <target>${java.version}</target>
+          <annotationProcessorPaths>
+            <path>
+              <groupId>org.projectlombok</groupId>
+              <artifactId>lombok</artifactId>
+              <version>1.18.34</version>
+            </path>
+          </annotationProcessorPaths>
         </configuration>
-      </plugin>
-      <plugin>
-        <artifactId>maven-shade-plugin</artifactId>
-        <version>3.2.4</version>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <goals>
-              <goal>shade</goal>
-            </goals>
-          </execution>
-        </executions>
       </plugin>
       <plugin>
         <artifactId>maven-shade-plugin</artifactId>
@@ -47,6 +42,10 @@
                 <relocation>
                   <pattern>de.rapha149.signgui</pattern>
                   <shadedPattern>de.flori.ezbanks.utils</shadedPattern>
+                </relocation>
+                <relocation>
+                  <pattern>org.bstats</pattern>
+                  <shadedPattern>de.flori.ezbanks.utils.bstats</shadedPattern>
                 </relocation>
               </relocations>
             </configuration>
@@ -72,6 +71,10 @@
     <repository>
       <id>jitpack.io</id>
       <url>https://jitpack.io</url>
+    </repository>
+    <repository>
+      <id>jeff-media-public</id>
+      <url>https://repo.jeff-media.com/public/</url>
     </repository>
     <repository>
       <id>papermc-repo</id>
