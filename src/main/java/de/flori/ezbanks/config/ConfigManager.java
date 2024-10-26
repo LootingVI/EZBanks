@@ -1,20 +1,24 @@
 package de.flori.ezbanks.config;
 
 import de.flori.ezbanks.EZBanks;
+import org.bukkit.configuration.file.FileConfiguration;
 
 public class ConfigManager {
 
     public void createConfig(){
-        EZBanks.getInstance().getConfig().set("MYSQL.password", "Type ur MYSQL password here");
-        EZBanks.getInstance().getConfig().set("MYSQL.name", "Type ur MYSQL username here");
-        EZBanks.getInstance().getConfig().set("MYSQL.ip", "Type ur MYSQL ip here");
-        EZBanks.getInstance().getConfig().set("MYSQL.port", 3306);
-        EZBanks.getInstance().getConfig().set("MYSQL.database", "Type ur MYSQL username here");
-        EZBanks.getInstance().getConfig().set("prefix", "§cEZBank §7>> ");
-        EZBanks.getInstance().getConfig().set("currency_symbol", "$");
-        EZBanks.getInstance().getConfig().set("new_card_cost", 1000);
-        EZBanks.getInstance().getConfig().set("bank_account_cost", 0);
-        EZBanks.getInstance().getConfig().set("send_anonym_data", true);
+        final FileConfiguration configuration = EZBanks.getInstance().getConfig();
+        configuration.set("MYSQL.password", "Type ur MYSQL password here");
+        configuration.set("MYSQL.name", "Type ur MYSQL username here");
+        configuration.set("MYSQL.ip", "Type ur MYSQL ip here");
+        configuration.set("MYSQL.port", 3306);
+        configuration.set("MYSQL.database", "Type ur MYSQL username here");
+        configuration.set("prefix", "§cEZBank §7>> ");
+        configuration.set("currency_symbol", "$");
+        configuration.set("new_card_cost", 1000);
+        configuration.set("bank_account_cost", 0);
+        configuration.set("send_anonymous_data", true);
+        configuration.set("bedrock_support", false);
+
         EZBanks.getInstance().saveConfig();
     }
 
@@ -22,21 +26,27 @@ public class ConfigManager {
         return EZBanks.getInstance().getConfig().getString("MYSQL.ip") != null;
     }
 
-    public boolean existsSendData(){
-        return EZBanks.getInstance().getConfig().getString("send_anonym_data") != null;
+    public boolean existsSendData() {
+        return EZBanks.getInstance().getConfig().getString("send_anonymous_data") != null;
     }
 
+    public boolean existsBedrockSupport() {
+        return EZBanks.getInstance().getConfig().getString("bedrock_support") != null;
+    }
 
     public String getPrefix(){
         return EZBanks.getInstance().getConfig().getString("prefix");
     }
 
-    public boolean isSendDataEnable(){
-        return EZBanks.getInstance().getConfig().getBoolean("send_anonym_data");
+    public boolean isSendDataEnabled(){
+        return EZBanks.getInstance().getConfig().getBoolean("send_anonymous_data");
     }
 
+    public boolean isBedrockSupportEnabled(){
+        return EZBanks.getInstance().getConfig().getBoolean("bedrock_support");
+    }
 
-    public Integer getBankCost(){
+    public int getBankCost(){
         return  EZBanks.getInstance().getConfig().getInt("bank_account_cost");
     }
 
@@ -44,7 +54,7 @@ public class ConfigManager {
         return EZBanks.getInstance().getConfig().getString("currency_symbol");
     }
 
-    public Integer getCardCost(){
+    public int getCardCost(){
         return EZBanks.getInstance().getConfig().getInt("new_card_cost");
     }
 
@@ -52,7 +62,7 @@ public class ConfigManager {
         return EZBanks.getInstance().getConfig().getString("MYSQL.password");
     }
 
-    public Integer getDBPort(){
+    public int getDBPort(){
         return EZBanks.getInstance().getConfig().getInt("MYSQL.port");
     }
 

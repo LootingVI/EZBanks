@@ -1,6 +1,7 @@
 package de.flori.ezbanks.commands;
 
 import de.flori.ezbanks.EZBanks;
+import de.flori.ezbanks.gui.BedrockForms.BedrockForms;
 import de.flori.ezbanks.manager.impl.BankAccount;
 import de.flori.ezbanks.utils.ItemUtils;
 import de.flori.ezbanks.utils.MessageUtils;
@@ -14,6 +15,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
@@ -62,6 +64,14 @@ public class ChangePinCommand extends Command {
         if(account.isSuspended()){
             player.sendMessage(EZBanks.getPrefix() + "§cAccess to this account is blocked!");
             return false;
+        }
+
+        if(EZBanks.isBedrockSupportAvailable()) {
+
+            if (EZBanks.getInstance().getFloodgateApi().isFloodgatePlayer(player.getUniqueId())) {
+                FloodgatePlayer floodgatePlayer = EZBanks.getInstance().getFloodgateApi().getPlayer(player.getUniqueId());
+                BedrockForms.sendChangePinForm(account, floodgatePlayer);
+            }
         }
 
         final SignGUI gui1 = SignGUI.builder()

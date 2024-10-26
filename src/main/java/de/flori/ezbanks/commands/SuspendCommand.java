@@ -2,7 +2,6 @@ package de.flori.ezbanks.commands;
 
 import de.flori.ezbanks.EZBanks;
 import de.flori.ezbanks.manager.impl.BankAccount;
-import de.flori.ezbanks.utils.MessageUtils;
 import de.rapha149.signgui.SignGUI;
 import de.rapha149.signgui.SignGUIAction;
 import net.kyori.adventure.text.Component;

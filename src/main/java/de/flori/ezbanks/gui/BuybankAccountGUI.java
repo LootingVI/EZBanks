@@ -5,6 +5,8 @@ import de.flori.ezbanks.manager.impl.BankAccount;
 import de.flori.ezbanks.utils.ItemBuilder;
 import de.flori.ezbanks.utils.ItemUtils;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -31,8 +33,8 @@ public class BuybankAccountGUI implements InventoryHolder, Listener {
     @Override
     public @NotNull Inventory getInventory() {
         final ItemStack itemStack = new ItemBuilder(Material.BOOK)
-                .setDisplayName("§eBuy a bank account")
-                .setLore("§cCost: §6" + EZBanks.getInstance().getConfigManager().getBankCost() + EZBanks.getInstance().getConfigManager().getSymbol())
+                .setDisplayName(MiniMessage.miniMessage().deserialize("<yellow>Buy a bank account").decoration(TextDecoration.ITALIC, false))
+                .setLore(MiniMessage.miniMessage().deserialize("<red>Cost: <gold>" + EZBanks.getInstance().getConfigManager().getBankCost() + EZBanks.getInstance().getConfigManager().getSymbol()).decoration(TextDecoration.ITALIC, false))
                 .build();
 
         this.inventory.setItem(22, itemStack);

@@ -9,6 +9,9 @@ dependencies:
     Vault:
       load: BEFORE
       required: true
+    floodgate:
+      load: BEFORE
+      required: false
 commands:
   bank:
     description: Open the bank menu

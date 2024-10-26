@@ -7,11 +7,12 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum TransactionType {
 
-    ADD_MONEY("§a§l→"),
-    REMOVE_MONEY("§c§l←"),
-    TRANSFER_IN("§a§l→"),
-    TRANSFER_OUT("§c§l←");
+    ADD_MONEY("<green><bold>→<reset>", "§a§l→"),
+    REMOVE_MONEY("<red><bold>←<reset>", "§c§l←"),
+    TRANSFER_IN("<green><bold>→<reset>", "§a§l→"),
+    TRANSFER_OUT("<red><bold>←<reset>", "§c§l←");
 
     private final String displayName;
+    private final String legacyDisplayName;
 
 }

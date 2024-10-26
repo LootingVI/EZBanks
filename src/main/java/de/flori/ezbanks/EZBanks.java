@@ -15,11 +15,11 @@ import de.flori.ezbanks.manager.BankManager;
 import lombok.Getter;
 import net.milkbowl.vault.economy.Economy;
 import org.bstats.bukkit.Metrics;
-import org.bstats.charts.SimplePie;
 import org.bukkit.command.CommandMap;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.geysermc.floodgate.api.FloodgateApi;
 
 @Getter
 public final class EZBanks extends JavaPlugin {
@@ -31,44 +31,48 @@ public final class EZBanks extends JavaPlugin {
     private DatabaseManager databaseManager;
     private BankManager bankManager;
     private Economy economy;
-    private static final String SPIGOT_RESOURCE_ID = "119092";
+    private FloodgateApi floodgateApi;
 
     @Override
     public void onEnable() {
         instance = this;
 
-        getLogger().severe("EZBanks - Support Discord Server: https://discord.gg/k4knhZrTYt");
-        getLogger().severe("EZBanks - Remember, this is the first alpha of the plugin it does not contain all functions yet! If you find any bugs please let me know on SpigotMC.");
-
-        //if (!setupEconomy()) {
-            //getLogger().severe("Vault not found! Disabling plugin...");
-            //getServer().getPluginManager().disablePlugin(this);
-            //return;
-        //}
-
-        final RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
-
-        economy = rsp.getProvider();
+        getLogger().severe("Support Discord Server: https://discord.gg/k4knhZrTYt");
+        getLogger().severe("Remember, this is the first alpha of the plugin it does not contain all functions yet! If you find any bugs please let me know on our Discord server.");
 
         configManager = new ConfigManager();
-        if (!configManager.existsConfig()) configManager.createConfig();
-
+        if (!configManager.existsConfig())
+            configManager.createConfig();
 
         databaseManager = new DatabaseManager(configManager.getDBHost(), configManager.getDBPort(), configManager.getDBUsername(), configManager.getDBPassword(), configManager.getDBDatabase(), "EZBank");
         bankManager = new BankManager();
 
+        setupEconomy();
 
-        if(!EZBanks.getInstance().getConfigManager().existsSendData()){
-            EZBanks.getInstance().getConfig().set("send_anonym_data", true);
+        if(configManager.isBedrockSupportEnabled()){
+            if(!getServer().getPluginManager().isPluginEnabled("floodgate")){
+                getLogger().warning("Since you have activated bedrock support you have to install the plugin Floodgate so that EZBanks works without problems");
+                return;
+            }
+
+            floodgateApi = FloodgateApi.getInstance();
+            getLogger().info("Floodgate support has been initialized");
+        }
+
+        if(!configManager.existsSendData()){
+            EZBanks.getInstance().getConfig().set("send_anonymous_data", true);
+            EZBanks.getInstance().saveConfig();
+        }
+        if(!configManager.existsBedrockSupport()){
+            EZBanks.getInstance().getConfig().set("bedrock_support", false);
             EZBanks.getInstance().saveConfig();
         }
 
-        if(EZBanks.getInstance().getConfigManager().isSendDataEnable()){
-            int pluginId = 23630;
+        if(configManager.isSendDataEnabled()){
+            final int pluginId = 23630;
             new Metrics(this, pluginId);
-            getLogger().severe("EZBanks - Sending of anonymous statistics to bStats successful");
+            getLogger().info("Sending of anonymous statistics to bStats successful");
         }
-
 
         registerCommands();
         registerListeners();
@@ -91,18 +95,24 @@ public final class EZBanks extends JavaPlugin {
         manager.registerEvents(new PlayerInteractEvent(), this);
     }
 
-    private boolean setupEconomy() {
-        //if (getServer().getPluginManager().getPlugin("Vault") == null) return false;
+    private void setupEconomy() {
+        if (!getServer().getPluginManager().isPluginEnabled("Vault")) {
+            System.err.println("You need to install the Vault plugin for EZBanks to work without problems");
+            return;
+        }
 
         final RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
-        if (rsp == null) return false;
+        if (rsp == null) return;
 
         economy = rsp.getProvider();
-        return true;
     }
 
     public static String getPrefix() {
         return EZBanks.getInstance().getConfigManager().getPrefix();
+    }
+
+    public static boolean isBedrockSupportAvailable() {
+        return EZBanks.getInstance().getConfigManager().isBedrockSupportEnabled() && EZBanks.getInstance().getFloodgateApi() != null;
     }
 
 }

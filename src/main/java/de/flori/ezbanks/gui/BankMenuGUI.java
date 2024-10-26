@@ -7,6 +7,8 @@ import de.flori.ezbanks.utils.ItemUtils;
 import de.rapha149.signgui.SignGUI;
 import de.rapha149.signgui.SignGUIAction;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
@@ -29,13 +31,13 @@ public class BankMenuGUI implements InventoryHolder, Listener {
         final Inventory inventory = Bukkit.createInventory(this, 27, Component.text("§cBank menu"));
 
         final ItemStack openBankItemStack = new ItemBuilder(Material.CHEST)
-                .setDisplayName("§eOpen bank menu")
-                .setLore("§aOpen the main bank menu")
+                .setDisplayName(MiniMessage.miniMessage().deserialize("<yellow>Open bank menu").decoration(TextDecoration.ITALIC, false))
+                .setLore(MiniMessage.miniMessage().deserialize("<green>Open the main bank menu").decoration(TextDecoration.ITALIC, false))
                 .build();
 
         final ItemStack resetPinItemStack = new ItemBuilder(Material.NAME_TAG)
-                .setDisplayName("§eReset card PIN")
-                .setLore("§aChange ur bank card pin")
+                .setDisplayName(MiniMessage.miniMessage().deserialize("<yellow>Reset card PIN").decoration(TextDecoration.ITALIC, false))
+                .setLore(MiniMessage.miniMessage().deserialize("<green>Change ur bank card pin").decoration(TextDecoration.ITALIC, false))
                 .build();
 
         inventory.setItem(11, openBankItemStack);

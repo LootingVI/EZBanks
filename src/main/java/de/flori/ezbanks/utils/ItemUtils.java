@@ -3,6 +3,8 @@ package de.flori.ezbanks.utils;
 import de.flori.ezbanks.EZBanks;
 import de.flori.ezbanks.manager.impl.BankAccount;
 import lombok.experimental.UtilityClass;
+import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -23,6 +25,7 @@ public class ItemUtils {
         return itemStack.getItemMeta().getPersistentDataContainer().has(BANK_CARD_KEY, PersistentDataType.STRING);
     }
 
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public boolean hasBankCard(Player player) {
         return Arrays.stream(player.getInventory().getContents()).filter(Objects::nonNull).anyMatch(ItemUtils::isBankCard);
     }
@@ -34,9 +37,9 @@ public class ItemUtils {
 
     public ItemStack getBankCard(BankAccount account) {
         return new ItemBuilder(Material.PAPER)
-                .setDisplayName("§6Bank Card §7(" + account.getBankId() + ")")
-                .setLore("§r§7Bank Owner: " + Bukkit.getOfflinePlayer(account.getOwnerUuid()).getName())
-                .setPersistentDataContainer(BANK_CARD_KEY, account.getBankId())
+                .setDisplayName(MiniMessage.miniMessage().deserialize("<gold>Bank Card <grey>(" + account.getBankId() + ")").decoration(TextDecoration.ITALIC, false))
+                .setLore(MiniMessage.miniMessage().deserialize("<grey>Bank Owner: " + Bukkit.getOfflinePlayer(account.getOwnerUuid()).getName()).decoration(TextDecoration.ITALIC, false))
+                .setPersistentData(BANK_CARD_KEY, PersistentDataType.STRING, account.getBankId())
                 .build();
     }
 

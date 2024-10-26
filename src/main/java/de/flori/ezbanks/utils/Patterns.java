@@ -3,10 +3,10 @@ package de.flori.ezbanks.utils;
 import java.util.regex.Pattern;
 
 public class Patterns {
+
     /**
      * Pattern for a double. Source: <a href="https://stackoverflow.com/a/16078719/13034634">...</a>
      */
-
     public static final Pattern DOUBLE_PATTERN = Pattern.compile(
             "[\\x00-\\x20]*[+-]?(NaN|Infinity|((((\\p{Digit}+)(\\.)?((\\p{Digit}+)?)" +
                     "([eE][+-]?(\\p{Digit}+))?)|(\\.((\\p{Digit}+))([eE][+-]?(\\p{Digit}+))?)|" +

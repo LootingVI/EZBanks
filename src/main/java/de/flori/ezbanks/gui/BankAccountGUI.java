@@ -11,6 +11,8 @@ import de.rapha149.signgui.SignGUI;
 import de.rapha149.signgui.SignGUIAction;
 import lombok.NoArgsConstructor;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
@@ -21,14 +23,14 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.stream.Collectors;
+import java.util.Objects;
 
 @NoArgsConstructor
 public class BankAccountGUI implements InventoryHolder, Listener {
@@ -46,7 +48,8 @@ public class BankAccountGUI implements InventoryHolder, Listener {
         final Inventory inventory = Bukkit.createInventory(this, 45, Component.text("§6Bank"));
 
         final ItemStack frameItemStack = new ItemBuilder(Material.BLACK_STAINED_GLASS_PANE)
-                .setDisplayName("§f")
+                .setDisplayName(MiniMessage.miniMessage().deserialize("<reset>"))
+                .addItemFlags(ItemFlag.HIDE_ADDITIONAL_TOOLTIP)
                 .build();
 
         for (int i = 0; i < 9; i++) inventory.setItem(i, frameItemStack);
@@ -61,33 +64,36 @@ public class BankAccountGUI implements InventoryHolder, Listener {
         for (int i = 36; i < 45; i++) inventory.setItem(i, frameItemStack);
 
         final ItemStack transferItemStack = new ItemBuilder(Material.ARROW)
-                .setDisplayName("§bSend Money")
-                .setLore("§7Send Money to another bank account!")
+                .setDisplayName(MiniMessage.miniMessage().deserialize("<aqua>Send Money").decoration(TextDecoration.ITALIC, false))
+                .setLore(MiniMessage.miniMessage().deserialize("<grey>Send Money to another bank account!").decoration(TextDecoration.ITALIC, false))
                 .build();
 
         final ItemStack infoItemStack = new ItemBuilder(Material.KNOWLEDGE_BOOK)
-                .setDisplayName("§bOwner: &f" + Bukkit.getOfflinePlayer(account.getOwnerUuid()).getName())
-                .setLore("§bID: §6"+ account.getBankId(), "§bBalance: §6" + account.getBalance() + EZBanks.getInstance().getConfigManager().getSymbol())
+                .setDisplayName(MiniMessage.miniMessage().deserialize("<aqua>Owner: <gold>" + Bukkit.getOfflinePlayer(account.getOwnerUuid()).getName()).decoration(TextDecoration.ITALIC, false))
+                .setLore(
+                        MiniMessage.miniMessage().deserialize("<aqua>ID: <gold>" + account.getBankId()).decoration(TextDecoration.ITALIC, false),
+                        MiniMessage.miniMessage().deserialize("<aqua>Balance: <gold>" + account.getBalance() + EZBanks.getInstance().getConfigManager().getSymbol()).decoration(TextDecoration.ITALIC, false)
+                )
                 .build();
 
         final ItemStack depositItemStack = new ItemBuilder(Material.ANVIL)
-                .setDisplayName("§bDeposit a custom amount of Money")
-                .setLore("§7Deposit a set amount of Money")
+                .setDisplayName(MiniMessage.miniMessage().deserialize("<aqua>Deposit a custom amount of Money").decoration(TextDecoration.ITALIC, false))
+                .setLore(MiniMessage.miniMessage().deserialize("<grey>Deposit a set amount of Money").decoration(TextDecoration.ITALIC, false))
                 .build();
 
         final ItemStack withdrawItemStack = new ItemBuilder(Material.DISPENSER)
-                .setDisplayName("§bWithdraw a custom amount of Money")
-                .setLore("§7Withdraw a custom amount of money")
+                .setDisplayName(MiniMessage.miniMessage().deserialize("<aqua>Withdraw a custom amount of Money").decoration(TextDecoration.ITALIC, false))
+                .setLore(MiniMessage.miniMessage().deserialize("<grey>Withdraw a custom amount of money").decoration(TextDecoration.ITALIC, false))
                 .build();
 
         final StringBuilder builder = new StringBuilder();
         account.getTransactions().reversed().forEach(transaction -> {
-            builder.append(transaction.getType().getDisplayName() + " §6").append(transaction.getAmount() + EZBanks.getInstance().getConfigManager().getSymbol()).append("§b " + Bukkit.getOfflinePlayer(transaction.getPlayer()).getName()).append(" §7" + Utils.DATE_AND_TIME_FORMAT.format(transaction.getTimestamp())).append('\n');
+            builder.append(transaction.getType().getDisplayName()).append(" <gold>").append(transaction.getAmount()).append(EZBanks.getInstance().getConfigManager().getSymbol()).append("<aqua> ").append(Bukkit.getOfflinePlayer(transaction.getPlayer()).getName()).append(" <gray>").append(Utils.DATE_AND_TIME_FORMAT.format(transaction.getTimestamp())).append('\n');
         });
 
         final ItemStack accountStatementItemStack = new ItemBuilder(Material.PAPER)
-                .setDisplayName("§bBank Transactions")
-                .setLore(builder.toString().split("\n"))
+                .setDisplayName(MiniMessage.miniMessage().deserialize("<aqua>Bank Transactions").decoration(TextDecoration.ITALIC, false))
+                .setLore(Arrays.stream(builder.toString().split("\n")).map(s -> MiniMessage.miniMessage().deserialize(s).decoration(TextDecoration.ITALIC, false)).toList())
                 .build();
 
         inventory.setItem(10, transferItemStack);
@@ -139,6 +145,11 @@ public class BankAccountGUI implements InventoryHolder, Listener {
                                 if (targetAccount == null) {
                                     p.sendMessage(Component.text(EZBanks.getPrefix() + "§cBank account not found!"));
                                     player.playSound(player.getLocation(), Sound.ITEM_OMINOUS_BOTTLE_DISPOSE, 1.0f, 1.0f);
+                                    return List.of();
+                                }
+
+                                if(Objects.equals(targetAccount.getBankId(), EZBanks.getInstance().getBankManager().getBankAccount(p.getUniqueId()).getBankId())){
+                                    p.sendMessage(EZBanks.getPrefix() + "§cYou cant send money to your own account!");
                                     return List.of();
                                 }
 

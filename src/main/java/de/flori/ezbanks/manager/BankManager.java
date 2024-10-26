@@ -82,7 +82,7 @@ public class BankManager {
     public void addTransaction(BankAccount account, TransactionType type, double amount, UUID player) {
         account.getTransactions().add(new Transaction(type, amount, System.currentTimeMillis(), player));
 
-        while (account.getTransactions().size() > 10)
+        while (account.getTransactions().size() > 5)
             account.getTransactions().removeFirst();
 
         updateBankAccount(account);
