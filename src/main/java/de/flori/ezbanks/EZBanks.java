@@ -12,6 +12,8 @@ import de.flori.ezbanks.gui.BankMenuGUI;
 import de.flori.ezbanks.gui.BuyCardGUI;
 import de.flori.ezbanks.gui.BuybankAccountGUI;
 import de.flori.ezbanks.manager.BankManager;
+import de.flori.ezbanks.manager.impl.DatabaseType;
+import de.flori.ezbanks.utils.PluginUpdater;
 import lombok.Getter;
 import net.milkbowl.vault.economy.Economy;
 import org.bstats.bukkit.Metrics;
@@ -44,7 +46,20 @@ public final class EZBanks extends JavaPlugin {
         if (!configManager.existsConfig())
             configManager.createConfig();
 
-        databaseManager = new DatabaseManager(configManager.getDBHost(), configManager.getDBPort(), configManager.getDBUsername(), configManager.getDBPassword(), configManager.getDBDatabase(), "EZBank");
+        String type = configManager.getDBType();
+        DatabaseType dbType = type.equalsIgnoreCase("mysql") ? DatabaseType.MYSQL : DatabaseType.SQLITE;
+        String fileOrDbName = configManager.getDBFile();
+
+        if (dbType == DatabaseType.SQLITE) {
+            this.databaseManager = new DatabaseManager(dbType, null, 0, null, null, fileOrDbName, null);
+        } else {
+            String host = getConfig().getString("database.host");
+            int port = getConfig().getInt("database.port");
+            String user = getConfig().getString("database.username");
+            String pass = getConfig().getString("database.password");
+            String db = getConfig().getString("database.database");
+            this.databaseManager = new DatabaseManager(dbType, host, port, user, pass, db, "EZBanksPool");
+        }
         bankManager = new BankManager();
 
         setupEconomy();
@@ -76,6 +91,13 @@ public final class EZBanks extends JavaPlugin {
 
         registerCommands();
         registerListeners();
+
+        if(configManager.isAutoUpdateEnabled()){
+            new Thread(() -> {
+                new PluginUpdater(this.getFile(), this.getLogger(), this.getDescription().getVersion()).checkAndUpdatePlugin();
+            }).start();
+        }
+
     }
 
     private void registerCommands() {

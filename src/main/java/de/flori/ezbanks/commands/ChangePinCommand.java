@@ -7,6 +7,7 @@ import de.flori.ezbanks.utils.ItemUtils;
 import de.flori.ezbanks.utils.MessageUtils;
 import de.rapha149.signgui.SignGUI;
 import de.rapha149.signgui.SignGUIAction;
+import de.rapha149.signgui.exception.SignGUIVersionException;
 import net.kyori.adventure.text.Component;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
@@ -74,38 +75,43 @@ public class ChangePinCommand extends Command {
             }
         }
 
-        final SignGUI gui1 = SignGUI.builder()
-                .setLines(null, "§-----------", "§cType new PIN in first line", "§-----------")
-                .setType(Material.ACACIA_SIGN)
-                .setColor(DyeColor.GRAY)
-                .setHandler((p, result) -> {
-                    final String input = result.getLineWithoutColor(0);
+        final SignGUI gui1;
+        try {
+            gui1 = SignGUI.builder()
+                    .setLines(null, "§-----------", "§cType new PIN in first line", "§-----------")
+                    .setType(Material.ACACIA_SIGN)
+                    .setColor(DyeColor.GRAY)
+                    .setHandler((p, result) -> {
+                        final String input = result.getLineWithoutColor(0);
 
-                    if (input.isEmpty()) {
-                        p.sendMessage(EZBanks.getPrefix() + "§cPlease enter a correct PIN!");
-                        player.playSound(player.getLocation(), Sound.ITEM_OMINOUS_BOTTLE_DISPOSE, 1.0f, 1.0f);
-                        return Collections.emptyList();
-                    }
+                        if (input.isEmpty()) {
+                            p.sendMessage(EZBanks.getPrefix() + "§cPlease enter a correct PIN!");
+                            player.playSound(player.getLocation(), Sound.ITEM_OMINOUS_BOTTLE_DISPOSE, 1.0f, 1.0f);
+                            return Collections.emptyList();
+                        }
 
-                    if (!MessageUtils.isValidInteger(input)) {
-                        p.sendMessage(EZBanks.getPrefix() + "§cThe PIN must be a number.");
-                        player.playSound(player.getLocation(), Sound.ITEM_OMINOUS_BOTTLE_DISPOSE, 1.0f, 1.0f);
-                        return Collections.emptyList();
-                    }
+                        if (!MessageUtils.isValidInteger(input)) {
+                            p.sendMessage(EZBanks.getPrefix() + "§cThe PIN must be a number.");
+                            player.playSound(player.getLocation(), Sound.ITEM_OMINOUS_BOTTLE_DISPOSE, 1.0f, 1.0f);
+                            return Collections.emptyList();
+                        }
 
-                    if (input.length() != 4) {
-                        p.sendMessage(EZBanks.getPrefix() + "§cThe PIN must be exactly 4 digits long.");
-                        player.playSound(player.getLocation(), Sound.ITEM_OMINOUS_BOTTLE_DISPOSE, 1.0f, 1.0f);
-                        return Collections.emptyList();
-                    }
+                        if (input.length() != 4) {
+                            p.sendMessage(EZBanks.getPrefix() + "§cThe PIN must be exactly 4 digits long.");
+                            player.playSound(player.getLocation(), Sound.ITEM_OMINOUS_BOTTLE_DISPOSE, 1.0f, 1.0f);
+                            return Collections.emptyList();
+                        }
 
-                    return List.of(
-                            SignGUIAction.run(() -> player.playSound(player.getLocation(), Sound.ITEM_BOOK_PAGE_TURN, 1.0f, 1.0f)),
-                            SignGUIAction.run(() -> EZBanks.getInstance().getBankManager().setNewPin(bankAccount, Integer.parseInt(input))),
-                            SignGUIAction.run(() -> player.sendMessage(EZBanks.getPrefix() + "§aYou have successfully changed the PIN to: §6" + input))
-                    );
-                })
-                .build();
+                        return List.of(
+                                SignGUIAction.run(() -> player.playSound(player.getLocation(), Sound.ITEM_BOOK_PAGE_TURN, 1.0f, 1.0f)),
+                                SignGUIAction.run(() -> EZBanks.getInstance().getBankManager().setNewPin(bankAccount, Integer.parseInt(input))),
+                                SignGUIAction.run(() -> player.sendMessage(EZBanks.getPrefix() + "§aYou have successfully changed the PIN to: §6" + input))
+                        );
+                    })
+                    .build();
+        } catch (SignGUIVersionException e) {
+            throw new RuntimeException(e);
+        }
 
         gui1.open(player);
         return true;

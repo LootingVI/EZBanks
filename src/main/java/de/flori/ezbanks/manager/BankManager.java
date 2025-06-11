@@ -6,6 +6,7 @@ import de.flori.ezbanks.EZBanks;
 import de.flori.ezbanks.database.DatabaseManager;
 import de.flori.ezbanks.manager.enums.TransactionType;
 import de.flori.ezbanks.manager.impl.BankAccount;
+import de.flori.ezbanks.manager.impl.DatabaseType;
 import de.flori.ezbanks.manager.impl.Transaction;
 
 import java.io.PrintStream;
@@ -20,16 +21,33 @@ public class BankManager {
 
     public BankManager() {
         this.databaseManager = EZBanks.getInstance().getDatabaseManager();
-        databaseManager.update("CREATE TABLE IF NOT EXISTS `banks` (`id` VARCHAR(10) NOT NULL PRIMARY KEY, `ownerUuid` UUID NOT NULL, `data` TEXT) ENGINE = InnoDB;");
+
+        String createTable;
+        if (databaseManager.getType() == DatabaseType.MYSQL) {
+            createTable = "CREATE TABLE IF NOT EXISTS `banks` (" +
+                    "`id` VARCHAR(10) NOT NULL PRIMARY KEY," +
+                    "`ownerUuid` VARCHAR(36) NOT NULL," +
+                    "`data` TEXT" +
+                    ") ENGINE=InnoDB;";
+        } else {
+            createTable = "CREATE TABLE IF NOT EXISTS `banks` (" +
+                    "`id` TEXT NOT NULL PRIMARY KEY," +
+                    "`ownerUuid` TEXT NOT NULL," +
+                    "`data` TEXT" +
+                    ");";
+        }
+
+        databaseManager.update(createTable);
     }
 
     public void createBankAccount(BankAccount account) {
-        databaseManager.update("INSERT INTO `banks` (`id`, `ownerUuid`, `data`) VALUES ('" + account.getBankId() + "', '" + account.getOwnerUuid() + "', '" + gson.toJson(account) + "');");
+        databaseManager.update("INSERT INTO `banks` (`id`, `ownerUuid`, `data`) VALUES ('" +
+                account.getBankId() + "', '" + account.getOwnerUuid() + "', '" + gson.toJson(account) + "');");
     }
 
     public boolean hasBankAccount(UUID ownerUuid) {
         try (ResultSet resultSet = databaseManager.getResult("SELECT * FROM `banks` WHERE ownerUuid='" + ownerUuid + "'")) {
-            return resultSet.next();
+            return resultSet != null && resultSet.next();
         } catch (SQLException exception) {
             exception.printStackTrace(new PrintStream(System.err));
             return false;
@@ -38,7 +56,7 @@ public class BankManager {
 
     public BankAccount getBankAccount(String bankId) {
         try (ResultSet resultSet = databaseManager.getResult("SELECT * FROM `banks` WHERE id='" + bankId + "'")) {
-            if (!resultSet.next()) return null;
+            if (resultSet == null || !resultSet.next()) return null;
             return gson.fromJson(resultSet.getString("data"), BankAccount.class);
         } catch (SQLException exception) {
             exception.printStackTrace(new PrintStream(System.err));
@@ -48,7 +66,7 @@ public class BankManager {
 
     public BankAccount getBankAccount(UUID ownerUuid) {
         try (ResultSet resultSet = databaseManager.getResult("SELECT * FROM `banks` WHERE ownerUuid='" + ownerUuid + "'")) {
-            if (!resultSet.next()) return null;
+            if (resultSet == null || !resultSet.next()) return null;
             return gson.fromJson(resultSet.getString("data"), BankAccount.class);
         } catch (SQLException exception) {
             exception.printStackTrace(new PrintStream(System.err));
@@ -88,12 +106,8 @@ public class BankManager {
         updateBankAccount(account);
     }
 
-    public void setSuspended(BankAccount account, boolean in){
+    public void setSuspended(BankAccount account, boolean in) {
         account.setSuspended(in);
-
         updateBankAccount(account);
     }
-
-
-
 }

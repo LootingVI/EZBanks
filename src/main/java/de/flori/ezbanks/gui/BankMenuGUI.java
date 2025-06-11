@@ -6,6 +6,7 @@ import de.flori.ezbanks.utils.ItemBuilder;
 import de.flori.ezbanks.utils.ItemUtils;
 import de.rapha149.signgui.SignGUI;
 import de.rapha149.signgui.SignGUIAction;
+import de.rapha149.signgui.exception.SignGUIVersionException;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -103,7 +104,9 @@ public class BankMenuGUI implements InventoryHolder, Listener {
                     break;
                 }
             }
-        } catch (NullPointerException ignored) {}
+        } catch (NullPointerException ignored) {} catch (SignGUIVersionException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }

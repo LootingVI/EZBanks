@@ -7,23 +7,26 @@ public class ConfigManager {
 
     public void createConfig(){
         final FileConfiguration configuration = EZBanks.getInstance().getConfig();
-        configuration.set("MYSQL.password", "Type ur MYSQL password here");
-        configuration.set("MYSQL.name", "Type ur MYSQL username here");
-        configuration.set("MYSQL.ip", "Type ur MYSQL ip here");
-        configuration.set("MYSQL.port", 3306);
-        configuration.set("MYSQL.database", "Type ur MYSQL username here");
+        configuration.set("database.type", "sqlite");
+        configuration.set("database.password", "Type ur MYSQL password here");
+        configuration.set("database.name", "Type ur MYSQL username here");
+        configuration.set("database.ip", "Type ur MYSQL ip here");
+        configuration.set("database.port", 3306);
+        configuration.set("database.database", "Type ur MYSQL database name here");
+        configuration.set("database.file", "plugins/EzBanks/database.db");
         configuration.set("prefix", "§cEZBank §7>> ");
         configuration.set("currency_symbol", "$");
         configuration.set("new_card_cost", 1000);
         configuration.set("bank_account_cost", 0);
         configuration.set("send_anonymous_data", true);
         configuration.set("bedrock_support", false);
+        configuration.set("auto_update", true);
 
         EZBanks.getInstance().saveConfig();
     }
 
     public boolean existsConfig(){
-        return EZBanks.getInstance().getConfig().getString("MYSQL.ip") != null;
+        return EZBanks.getInstance().getConfig().getString("database.ip") != null;
     }
 
     public boolean existsSendData() {
@@ -63,19 +66,31 @@ public class ConfigManager {
     }
 
     public int getDBPort(){
-        return EZBanks.getInstance().getConfig().getInt("MYSQL.port");
+        return EZBanks.getInstance().getConfig().getInt("database.port");
     }
 
     public String getDBUsername(){
-        return EZBanks.getInstance().getConfig().getString("MYSQL.name");
+        return EZBanks.getInstance().getConfig().getString("database.name");
     }
 
     public String getDBHost(){
-        return EZBanks.getInstance().getConfig().getString("MYSQL.ip");
+        return EZBanks.getInstance().getConfig().getString("database.ip");
     }
 
     public String getDBDatabase(){
-        return EZBanks.getInstance().getConfig().getString("MYSQL.database");
+        return EZBanks.getInstance().getConfig().getString("database.database");
+    }
+
+    public String getDBFile(){
+        return EZBanks.getInstance().getConfig().getString("database.file");
+    }
+
+    public String getDBType(){
+        return EZBanks.getInstance().getConfig().getString("database.type");
+    }
+
+    public boolean isAutoUpdateEnabled() {
+        return EZBanks.getInstance().getConfig().getBoolean("auto_update");
     }
 
 
