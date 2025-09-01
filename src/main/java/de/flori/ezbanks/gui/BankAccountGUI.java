@@ -1,6 +1,7 @@
 package de.flori.ezbanks.gui;
 
 import de.flori.ezbanks.EZBanks;
+import de.flori.ezbanks.manager.BankManager;
 import de.flori.ezbanks.manager.enums.TransactionType;
 import de.flori.ezbanks.manager.impl.BankAccount;
 import de.flori.ezbanks.utils.ItemBuilder;
@@ -28,13 +29,19 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Arrays;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @NoArgsConstructor
 public class BankAccountGUI implements InventoryHolder, Listener {
+
+    private static final Logger LOGGER = Logger.getLogger(BankAccountGUI.class.getName());
+    private static final double MIN_TRANSACTION_AMOUNT = 0.01;
 
     private BankAccount account;
 
@@ -44,17 +51,29 @@ public class BankAccountGUI implements InventoryHolder, Listener {
 
     @Override
     public @NotNull Inventory getInventory() {
-        if (account == null) throw new IllegalStateException("BankAccount is null!");
+        if (account == null) {
+            throw new IllegalStateException("BankAccount cannot be null!");
+        }
 
-        final Inventory inventory = Bukkit.createInventory(this, 45, Component.text("§6Bank"));
+        final Inventory inventory = Bukkit.createInventory(this, 45,
+                Component.text("§6Bank - " + account.getBankId()));
 
+        setupInventoryFrame(inventory);
+        setupInventoryItems(inventory);
+
+        return inventory;
+    }
+
+    private void setupInventoryFrame(Inventory inventory) {
         final ItemStack frameItemStack = new ItemBuilder(Material.BLACK_STAINED_GLASS_PANE)
                 .setDisplayName(MiniMessage.miniMessage().deserialize("<reset>"))
                 .addItemFlags(ItemFlag.HIDE_ADDITIONAL_TOOLTIP)
                 .build();
 
+        // Top border
         for (int i = 0; i < 9; i++) inventory.setItem(i, frameItemStack);
 
+        // Side borders
         inventory.setItem(9, frameItemStack);
         inventory.setItem(17, frameItemStack);
         inventory.setItem(18, frameItemStack);
@@ -62,48 +81,92 @@ public class BankAccountGUI implements InventoryHolder, Listener {
         inventory.setItem(27, frameItemStack);
         inventory.setItem(35, frameItemStack);
 
+        // Bottom border
         for (int i = 36; i < 45; i++) inventory.setItem(i, frameItemStack);
+    }
 
+    private void setupInventoryItems(Inventory inventory) {
+        BankManager bankManager = EZBanks.getInstance().getBankManager();
+        String currencySymbol = bankManager.getCurrencySymbol();
+
+        // Transfer Money Item
         final ItemStack transferItemStack = new ItemBuilder(Material.ARROW)
                 .setDisplayName(MiniMessage.miniMessage().deserialize("<aqua>Send Money").decoration(TextDecoration.ITALIC, false))
-                .setLore(MiniMessage.miniMessage().deserialize("<grey>Send Money to another bank account!").decoration(TextDecoration.ITALIC, false))
-                .build();
-
-        final ItemStack infoItemStack = new ItemBuilder(Material.KNOWLEDGE_BOOK)
-                .setDisplayName(MiniMessage.miniMessage().deserialize("<aqua>Owner: <gold>" + Bukkit.getOfflinePlayer(account.getOwnerUuid()).getName()).decoration(TextDecoration.ITALIC, false))
                 .setLore(
-                        MiniMessage.miniMessage().deserialize("<aqua>ID: <gold>" + account.getBankId()).decoration(TextDecoration.ITALIC, false),
-                        MiniMessage.miniMessage().deserialize("<aqua>Balance: <gold>" + account.getBalance() + EZBanks.getInstance().getConfigManager().getSymbol()).decoration(TextDecoration.ITALIC, false)
+                        MiniMessage.miniMessage().deserialize("<grey>Send money to another bank account").decoration(TextDecoration.ITALIC, false),
+                        MiniMessage.miniMessage().deserialize("<grey>Minimum amount: <yellow>" + MIN_TRANSACTION_AMOUNT + currencySymbol).decoration(TextDecoration.ITALIC, false)
                 )
                 .build();
 
+        // Account Info Item
+        String ownerName = Bukkit.getOfflinePlayer(account.getOwnerUuid()).getName();
+        if (ownerName == null) ownerName = "Unknown";
+
+        final ItemStack infoItemStack = new ItemBuilder(Material.KNOWLEDGE_BOOK)
+                .setDisplayName(MiniMessage.miniMessage().deserialize("<aqua>Account Information").decoration(TextDecoration.ITALIC, false))
+                .setLore(
+                        MiniMessage.miniMessage().deserialize("<aqua>Owner: <gold>" + ownerName).decoration(TextDecoration.ITALIC, false),
+                        MiniMessage.miniMessage().deserialize("<aqua>ID: <gold>" + account.getBankId()).decoration(TextDecoration.ITALIC, false),
+                        MiniMessage.miniMessage().deserialize("<aqua>Balance: <gold>" + bankManager.formatBalance(account.getBalance())).decoration(TextDecoration.ITALIC, false),
+                        MiniMessage.miniMessage().deserialize("<aqua>Status: " + (account.isSuspended() ? "<red>Suspended" : "<green>Active")).decoration(TextDecoration.ITALIC, false),
+                        MiniMessage.miniMessage().deserialize("<grey>Max Balance: <yellow>" + bankManager.formatBalance(bankManager.getMaxBalance())).decoration(TextDecoration.ITALIC, false)
+                )
+                .build();
+
+        // Deposit Item
         final ItemStack depositItemStack = new ItemBuilder(Material.ANVIL)
-                .setDisplayName(MiniMessage.miniMessage().deserialize("<aqua>Deposit a custom amount of Money").decoration(TextDecoration.ITALIC, false))
-                .setLore(MiniMessage.miniMessage().deserialize("<grey>Deposit a set amount of Money").decoration(TextDecoration.ITALIC, false))
+                .setDisplayName(MiniMessage.miniMessage().deserialize("<aqua>Deposit Money").decoration(TextDecoration.ITALIC, false))
+                .setLore(
+                        MiniMessage.miniMessage().deserialize("<grey>Deposit money from your wallet").decoration(TextDecoration.ITALIC, false),
+                        MiniMessage.miniMessage().deserialize("<grey>Minimum amount: <yellow>" + MIN_TRANSACTION_AMOUNT + currencySymbol).decoration(TextDecoration.ITALIC, false)
+                )
                 .build();
 
+        // Withdraw Item
         final ItemStack withdrawItemStack = new ItemBuilder(Material.DISPENSER)
-                .setDisplayName(MiniMessage.miniMessage().deserialize("<aqua>Withdraw a custom amount of Money").decoration(TextDecoration.ITALIC, false))
-                .setLore(MiniMessage.miniMessage().deserialize("<grey>Withdraw a custom amount of money").decoration(TextDecoration.ITALIC, false))
+                .setDisplayName(MiniMessage.miniMessage().deserialize("<aqua>Withdraw Money").decoration(TextDecoration.ITALIC, false))
+                .setLore(
+                        MiniMessage.miniMessage().deserialize("<grey>Withdraw money to your wallet").decoration(TextDecoration.ITALIC, false),
+                        MiniMessage.miniMessage().deserialize("<grey>Minimum amount: <yellow>" + MIN_TRANSACTION_AMOUNT + currencySymbol).decoration(TextDecoration.ITALIC, false)
+                )
                 .build();
 
-        final StringBuilder builder = new StringBuilder();
-        account.getTransactions().reversed().forEach(transaction -> {
-            builder.append(transaction.getType().getDisplayName()).append(" <gold>").append(transaction.getAmount()).append(EZBanks.getInstance().getConfigManager().getSymbol()).append("<aqua> ").append(Bukkit.getOfflinePlayer(transaction.getPlayer()).getName()).append(" <gray>").append(Utils.DATE_AND_TIME_FORMAT.format(transaction.getTimestamp())).append('\n');
-        });
+        // Transaction History Item
+        final ItemStack accountStatementItemStack = createTransactionHistoryItem(currencySymbol);
 
-        final ItemStack accountStatementItemStack = new ItemBuilder(Material.PAPER)
-                .setDisplayName(MiniMessage.miniMessage().deserialize("<aqua>Bank Transactions").decoration(TextDecoration.ITALIC, false))
-                .setLore(Arrays.stream(builder.toString().split("\n")).map(s -> MiniMessage.miniMessage().deserialize(s).decoration(TextDecoration.ITALIC, false)).toList())
-                .build();
-
+        // Set items in inventory
         inventory.setItem(10, transferItemStack);
         inventory.setItem(16, depositItemStack);
         inventory.setItem(22, infoItemStack);
         inventory.setItem(28, withdrawItemStack);
         inventory.setItem(34, accountStatementItemStack);
+    }
 
-        return inventory;
+    private ItemStack createTransactionHistoryItem(String currencySymbol) {
+        final StringBuilder builder = new StringBuilder();
+
+        if (account.getTransactions().isEmpty()) {
+            builder.append("<grey>No transactions yet");
+        } else {
+            account.getTransactions().reversed().forEach(transaction -> {
+                String playerName = Bukkit.getOfflinePlayer(transaction.getPlayer()).getName();
+                if (playerName == null) playerName = "Unknown";
+
+                builder.append(transaction.getType().getDisplayName())
+                        .append(" <gold>").append(String.format("%.2f", transaction.getAmount()))
+                        .append(currencySymbol).append("<aqua> ")
+                        .append(playerName).append(" <gray>")
+                        .append(Utils.DATE_AND_TIME_FORMAT.format(transaction.getTimestamp()))
+                        .append('\n');
+            });
+        }
+
+        return new ItemBuilder(Material.PAPER)
+                .setDisplayName(MiniMessage.miniMessage().deserialize("<aqua>Transaction History").decoration(TextDecoration.ITALIC, false))
+                .setLore(Arrays.stream(builder.toString().split("\n"))
+                        .map(s -> MiniMessage.miniMessage().deserialize(s).decoration(TextDecoration.ITALIC, false))
+                        .toList())
+                .build();
     }
 
     @EventHandler
@@ -113,191 +176,290 @@ public class BankAccountGUI implements InventoryHolder, Listener {
             event.setCancelled(true);
 
             final ItemStack item = event.getCurrentItem();
-            if (item == null)
-                return;
+            if (item == null) return;
 
             final Player player = (Player) event.getWhoClicked();
 
-            final ItemStack bankCardItemStack = player.getInventory().getItemInMainHand();
-            if (!ItemUtils.isBankCard(bankCardItemStack)) {
-                player.sendMessage(Component.text(EZBanks.getPrefix() + "§cNo bank card recognised! Please hold a bank card in your hand while using the bank menu."));
-                player.playSound(player.getLocation(), Sound.ITEM_OMINOUS_BOTTLE_DISPOSE, 0.0f, 1.0f);
+            // Validate bank card
+            if (!validateBankCard(player)) {
                 return;
             }
 
-            final BankAccount account = EZBanks.getInstance().getBankManager().getBankAccount(ItemUtils.getBankId(bankCardItemStack));
-            switch (item.getType()) {
-                case ARROW -> {
-                    final SignGUI bankIdGui = SignGUI.builder()
-                            .setLines(null, "-----------", "§cEnter the bank id", "-----------")
-                            .setType(Material.ACACIA_SIGN)
-                            .setColor(DyeColor.GRAY)
-                            .setHandler((p, result) -> {
-                                final String targetBankId = result.getLineWithoutColor(0);
+            // Get current account data
+            final ItemStack bankCardItemStack = player.getInventory().getItemInMainHand();
+            final BankAccount currentAccount = EZBanks.getInstance().getBankManager()
+                    .getBankAccount(ItemUtils.getBankId(bankCardItemStack));
 
-                                if (targetBankId.isEmpty()) {
-                                    p.sendMessage(Component.text(EZBanks.getPrefix() + "§cPlease enter a correct bank id!"));
-                                    player.playSound(player.getLocation(), Sound.ITEM_OMINOUS_BOTTLE_DISPOSE, 1.0f, 1.0f);
-                                    return List.of();
-                                }
-
-                                final BankAccount targetAccount = EZBanks.getInstance().getBankManager().getBankAccount(targetBankId);
-
-                                if (targetAccount == null) {
-                                    p.sendMessage(Component.text(EZBanks.getPrefix() + "§cBank account not found!"));
-                                    player.playSound(player.getLocation(), Sound.ITEM_OMINOUS_BOTTLE_DISPOSE, 1.0f, 1.0f);
-                                    return List.of();
-                                }
-
-                                if(Objects.equals(targetAccount.getBankId(), EZBanks.getInstance().getBankManager().getBankAccount(p.getUniqueId()).getBankId())){
-                                    p.sendMessage(EZBanks.getPrefix() + "§cYou cant send money to your own account!");
-                                    return List.of();
-                                }
-
-                                return List.of(SignGUIAction.run(() -> {
-                                    final SignGUI amountGui;
-                                    try {
-                                        amountGui = SignGUI.builder()
-                                                .setLines(null, "-----------", "§cEnter amount to transfer", "-----------")
-                                                .setType(Material.ACACIA_SIGN)
-                                                .setColor(DyeColor.GRAY)
-                                                .setHandler((p1, result1) -> {
-                                                    final String amount = result1.getLineWithoutColor(0);
-
-                                                    if (amount.isEmpty() || !MessageUtils.isValidInteger(amount)) {
-                                                        p1.sendMessage(Component.text(EZBanks.getPrefix() + "§cPlease enter a correct amount!"));
-                                                        player.playSound(player.getLocation(), Sound.ITEM_OMINOUS_BOTTLE_DISPOSE, 1.0f, 1.0f);
-                                                        return List.of();
-                                                    }
-
-                                                    final int amountInt = Integer.parseInt(amount);
-                                                    final double balance = account.getBalance();
-                                                    if(amountInt < 0.1){
-                                                        p.sendMessage(Component.text(EZBanks.getPrefix() + "§cPlease enter a correct amount!"));
-                                                        player.playSound(player.getLocation(), Sound.ITEM_OMINOUS_BOTTLE_DISPOSE, 1.0f, 1.0f);
-                                                    }else{
-                                                        if (amountInt > balance) {
-                                                            p1.sendMessage(Component.text(EZBanks.getPrefix() + "§cYou don't have enough money in your bank account!"));
-                                                            player.playSound(player.getLocation(), Sound.ITEM_OMINOUS_BOTTLE_DISPOSE, 1.0f, 1.0f);
-                                                            return List.of();
-                                                        }
-
-                                                        final Player targetPlayer = Bukkit.getPlayer(targetAccount.getOwnerUuid());
-                                                        if (targetPlayer != null) {
-                                                            targetPlayer.sendMessage(Component.text(EZBanks.getPrefix() + "§aYou have received a bank transfer from §b" + p1.getName() + "§a. Amount: §6" + amount + EZBanks.getInstance().getConfigManager().getSymbol()));
-                                                        }
-
-                                                        EZBanks.getInstance().getBankManager().removeBalance(account, amountInt);
-                                                        EZBanks.getInstance().getBankManager().addBalance(targetAccount, amountInt);
-                                                        EZBanks.getInstance().getBankManager().addTransaction(account, TransactionType.TRANSFER_OUT, amountInt, p.getUniqueId());
-                                                        EZBanks.getInstance().getBankManager().addTransaction(targetAccount, TransactionType.TRANSFER_IN, amountInt, p.getUniqueId());
-                                                        player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.0f);
-
-                                                        p1.sendMessage(Component.text(EZBanks.getPrefix() + "§aYou have successfully transferred §6" + amount + EZBanks.getInstance().getConfigManager().getSymbol() + " §ato §b" + Bukkit.getOfflinePlayer(targetAccount.getOwnerUuid()).getName()));
-                                                        return List.of();
-                                                    }
-                                                    return List.of();
-                                                })
-                                                .build();
-                                    } catch (SignGUIVersionException e) {
-                                        throw new RuntimeException(e);
-                                    }
-
-                                    amountGui.open(player);
-                                }));
-                            })
-                            .build();
-
-                    bankIdGui.open(player);
-                }
-                case DISPENSER -> {
-                    final SignGUI gui = SignGUI.builder()
-                            .setLines(null, "-----------", "§cEnter amount to withdraw", "-----------")
-                            .setType(Material.ACACIA_SIGN)
-                            .setColor(DyeColor.GRAY)
-                            .setHandler((p, result) -> {
-                                final String amount = result.getLineWithoutColor(0);
-
-                                if (amount.isEmpty() || !MessageUtils.isValidInteger(amount)) {
-                                    p.sendMessage(Component.text(EZBanks.getPrefix() + "§cPlease enter a correct amount!"));
-                                    player.playSound(player.getLocation(), Sound.ITEM_OMINOUS_BOTTLE_DISPOSE, 1.0f, 1.0f);
-                                    return List.of();
-                                }
-
-                                final int amountInt = Integer.parseInt(amount);
-                                final double balance = account.getBalance();
-
-                                if(amountInt < 0.1){
-                                   p.sendMessage(Component.text(EZBanks.getPrefix() + "§cPlease enter a correct amount!"));
-                                    player.playSound(player.getLocation(), Sound.ITEM_OMINOUS_BOTTLE_DISPOSE, 1.0f, 1.0f);
-                                }else{
-                                    if (amountInt > balance) {
-                                        p.sendMessage(Component.text(EZBanks.getPrefix() + "§cYou don't have enough money in your bank account!"));
-                                        player.playSound(player.getLocation(), Sound.ITEM_OMINOUS_BOTTLE_DISPOSE, 1.0f, 1.0f);
-                                        return List.of();
-                                    }
-
-                                    EZBanks.getInstance().getBankManager().removeBalance(account, amountInt);
-                                    EZBanks.getInstance().getEconomy().depositPlayer(p, amountInt);
-                                    player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.0f);
-
-                                    EZBanks.getInstance().getBankManager().addTransaction(account, TransactionType.REMOVE_MONEY, amountInt, p.getUniqueId());
-
-                                    p.sendMessage(Component.text(EZBanks.getPrefix() + "§aYou have successfully withdrawn §6" + amount + EZBanks.getInstance().getConfigManager().getSymbol()));
-                                    return List.of();
-                                }
-                                return List.of();
-                            })
-                            .build();
-
-                    gui.open(player);
-                }
-                case ANVIL -> {
-                    final SignGUI gui = SignGUI.builder()
-                            .setLines(null, "-----------", "§cEnter amount to deposit", "-----------")
-                            .setType(Material.ACACIA_SIGN)
-                            .setColor(DyeColor.GRAY)
-                            .setHandler((p, result) -> {
-                                final String amount = result.getLineWithoutColor(0);
-
-                                if (amount.isEmpty() || !MessageUtils.isValidInteger(amount)) {
-                                    p.sendMessage(Component.text(EZBanks.getPrefix() + "§cPlease enter a correct amount!"));
-                                    player.playSound(player.getLocation(), Sound.ITEM_OMINOUS_BOTTLE_DISPOSE, 1.0f, 1.0f);
-                                    return List.of();
-                                }
-
-                                final int amountInt = Integer.parseInt(amount);
-                                final double balance = EZBanks.getInstance().getEconomy().getBalance(p);
-
-                                if(amountInt < 0.1){
-                                    p.sendMessage(Component.text(EZBanks.getPrefix() + "§cPlease enter a correct amount!"));
-                                    player.playSound(player.getLocation(), Sound.ITEM_OMINOUS_BOTTLE_DISPOSE, 1.0f, 1.0f);
-                                }else{
-                                    if (amountInt > balance) {
-                                        p.sendMessage(Component.text(EZBanks.getPrefix() + "§cYou don't have enough money in your inventory!"));
-                                        player.playSound(player.getLocation(), Sound.ITEM_OMINOUS_BOTTLE_DISPOSE, 1.0f, 1.0f);
-                                        return List.of();
-                                    }
-
-                                    EZBanks.getInstance().getBankManager().addBalance(account, amountInt);
-                                    EZBanks.getInstance().getEconomy().withdrawPlayer(p, amountInt);
-
-                                    EZBanks.getInstance().getBankManager().addTransaction(account, TransactionType.ADD_MONEY, amountInt, p.getUniqueId());
-                                    player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.0f);
-
-                                    p.sendMessage(Component.text(EZBanks.getPrefix() + "§aYou have successfully deposited §6" + amount + EZBanks.getInstance().getConfigManager().getSymbol()));
-                                    return List.of();
-                                }
-                                return List.of();
-                            })
-                            .build();
-
-                    gui.open(player);
-                }
+            if (currentAccount == null) {
+                sendErrorMessage(player, "Bank account not found!");
+                return;
             }
-        } catch (NullPointerException | NoSuchElementException ignored) {} catch (SignGUIVersionException e) {
-            throw new RuntimeException(e);
+
+            if (currentAccount.isSuspended()) {
+                sendErrorMessage(player, "Your bank account is suspended!");
+                return;
+            }
+
+            // Handle different actions
+            switch (item.getType()) {
+                case ARROW -> handleTransfer(player, currentAccount);
+                case DISPENSER -> handleWithdraw(player, currentAccount);
+                case ANVIL -> handleDeposit(player, currentAccount);
+                default -> {}
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error handling bank account GUI click", e);
+            sendErrorMessage((Player) event.getWhoClicked(), "An error occurred while processing your request.");
         }
     }
 
+    private boolean validateBankCard(Player player) {
+        final ItemStack bankCardItemStack = player.getInventory().getItemInMainHand();
+        if (!ItemUtils.isBankCard(bankCardItemStack)) {
+            sendErrorMessage(player, "No bank card recognized! Please hold a bank card in your hand.");
+            return false;
+        }
+        return true;
+    }
+
+    private void handleTransfer(Player player, BankAccount account) {
+        try {
+            final SignGUI bankIdGui = SignGUI.builder()
+                    .setLines(null, "-----------", "§cEnter bank ID", "-----------")
+                    .setType(Material.ACACIA_SIGN)
+                    .setColor(DyeColor.GRAY)
+                    .setHandler((p, result) -> {
+                        final String targetBankId = result.getLineWithoutColor(0);
+
+                        if (targetBankId == null || targetBankId.trim().isEmpty()) {
+                            sendErrorMessage(p, "Please enter a valid bank ID!");
+                            return List.of();
+                        }
+
+                        final BankAccount targetAccount = EZBanks.getInstance().getBankManager()
+                                .getBankAccount(targetBankId.trim());
+
+                        if (targetAccount == null) {
+                            sendErrorMessage(p, "Bank account not found!");
+                            return List.of();
+                        }
+
+                        if (Objects.equals(targetAccount.getBankId(), account.getBankId())) {
+                            sendErrorMessage(p, "You cannot send money to your own account!");
+                            return List.of();
+                        }
+
+                        if (targetAccount.isSuspended()) {
+                            sendErrorMessage(p, "The target account is suspended!");
+                            return List.of();
+                        }
+
+                        return List.of(SignGUIAction.run(() -> openTransferAmountGui(player, account, targetAccount)));
+                    })
+                    .build();
+
+            bankIdGui.open(player);
+        } catch (SignGUIVersionException e) {
+            LOGGER.log(Level.SEVERE, "Error creating transfer GUI", e);
+            sendErrorMessage(player, "Failed to open transfer interface.");
+        }
+    }
+
+    private void openTransferAmountGui(Player player, BankAccount fromAccount, BankAccount toAccount) {
+        try {
+            final SignGUI amountGui = SignGUI.builder()
+                    .setLines(null, "-----------", "§cEnter amount", "-----------")
+                    .setType(Material.ACACIA_SIGN)
+                    .setColor(DyeColor.GRAY)
+                    .setHandler((p, result) -> {
+                        final String amountStr = result.getLineWithoutColor(0);
+
+                        if (!isValidAmount(amountStr)) {
+                            sendErrorMessage(p, "Please enter a valid amount!");
+                            return List.of();
+                        }
+
+                        final double amount = parseAmount(amountStr);
+
+                        if (amount < MIN_TRANSACTION_AMOUNT) {
+                            sendErrorMessage(p, "Minimum transfer amount is " +
+                                    EZBanks.getInstance().getBankManager().formatBalance(MIN_TRANSACTION_AMOUNT));
+                            return List.of();
+                        }
+
+                        return processTransfer(p, fromAccount, toAccount, amount);
+                    })
+                    .build();
+
+            amountGui.open(player);
+        } catch (SignGUIVersionException e) {
+            LOGGER.log(Level.SEVERE, "Error creating amount GUI", e);
+            sendErrorMessage(player, "Failed to open amount interface.");
+        }
+    }
+
+    private List<SignGUIAction> processTransfer(Player player, BankAccount fromAccount, BankAccount toAccount, double amount) {
+        try {
+            BankManager bankManager = EZBanks.getInstance().getBankManager();
+
+            if (!bankManager.transferFunds(fromAccount, toAccount, amount)) {
+                return List.of(); // Error messages are handled in transferFunds
+            }
+
+            // Notify recipient if online
+            final Player targetPlayer = Bukkit.getPlayer(toAccount.getOwnerUuid());
+            if (targetPlayer != null) {
+                targetPlayer.sendMessage(Component.text(EZBanks.getPrefix() +
+                        "§aYou received a transfer from §b" + player.getName() +
+                        "§a. Amount: §6" + bankManager.formatBalance(amount)));
+            }
+
+            sendSuccessMessage(player, "Successfully transferred " + bankManager.formatBalance(amount) +
+                    " to " + Bukkit.getOfflinePlayer(toAccount.getOwnerUuid()).getName());
+
+            return List.of();
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error processing transfer", e);
+            sendErrorMessage(player, "Transfer failed due to an error.");
+            return List.of();
+        }
+    }
+
+    private void handleWithdraw(Player player, BankAccount account) {
+        try {
+            final SignGUI gui = SignGUI.builder()
+                    .setLines(null, "-----------", "§cEnter amount", "-----------")
+                    .setType(Material.ACACIA_SIGN)
+                    .setColor(DyeColor.GRAY)
+                    .setHandler((p, result) -> {
+                        final String amountStr = result.getLineWithoutColor(0);
+
+                        if (!isValidAmount(amountStr)) {
+                            sendErrorMessage(p, "Please enter a valid amount!");
+                            return List.of();
+                        }
+
+                        final double amount = parseAmount(amountStr);
+
+                        if (amount < MIN_TRANSACTION_AMOUNT) {
+                            sendErrorMessage(p, "Minimum withdrawal amount is " +
+                                    EZBanks.getInstance().getBankManager().formatBalance(MIN_TRANSACTION_AMOUNT));
+                            return List.of();
+                        }
+
+                        if (amount > account.getBalance()) {
+                            sendErrorMessage(p, "Insufficient funds in your bank account!");
+                            return List.of();
+                        }
+
+                        try {
+                            BankManager bankManager = EZBanks.getInstance().getBankManager();
+                            bankManager.removeBalance(account, amount);
+                            EZBanks.getInstance().getEconomy().depositPlayer(p, amount);
+                            bankManager.addTransaction(account, TransactionType.REMOVE_MONEY, amount, p.getUniqueId());
+
+                            sendSuccessMessage(p, "Successfully withdrew " + bankManager.formatBalance(amount));
+                        } catch (Exception e) {
+                            LOGGER.log(Level.SEVERE, "Error processing withdrawal", e);
+                            sendErrorMessage(p, "Withdrawal failed due to an error.");
+                        }
+
+                        return List.of();
+                    })
+                    .build();
+
+            gui.open(player);
+        } catch (SignGUIVersionException e) {
+            LOGGER.log(Level.SEVERE, "Error creating withdrawal GUI", e);
+            sendErrorMessage(player, "Failed to open withdrawal interface.");
+        }
+    }
+
+    private void handleDeposit(Player player, BankAccount account) {
+        try {
+            final SignGUI gui = SignGUI.builder()
+                    .setLines(null, "-----------", "§cEnter amount", "-----------")
+                    .setType(Material.ACACIA_SIGN)
+                    .setColor(DyeColor.GRAY)
+                    .setHandler((p, result) -> {
+                        final String amountStr = result.getLineWithoutColor(0);
+
+                        if (!isValidAmount(amountStr)) {
+                            sendErrorMessage(p, "Please enter a valid amount!");
+                            return List.of();
+                        }
+
+                        final double amount = parseAmount(amountStr);
+
+                        if (amount < MIN_TRANSACTION_AMOUNT) {
+                            sendErrorMessage(p, "Minimum deposit amount is " +
+                                    EZBanks.getInstance().getBankManager().formatBalance(MIN_TRANSACTION_AMOUNT));
+                            return List.of();
+                        }
+
+                        final double walletBalance = EZBanks.getInstance().getEconomy().getBalance(p);
+                        if (amount > walletBalance) {
+                            sendErrorMessage(p, "Insufficient funds in your wallet!");
+                            return List.of();
+                        }
+
+                        BankManager bankManager = EZBanks.getInstance().getBankManager();
+                        if (!bankManager.canAddBalance(account, amount)) {
+                            sendErrorMessage(p, "Deposit would exceed maximum balance limit!");
+                            return List.of();
+                        }
+
+                        try {
+                            bankManager.addBalance(account, amount);
+                            EZBanks.getInstance().getEconomy().withdrawPlayer(p, amount);
+                            bankManager.addTransaction(account, TransactionType.ADD_MONEY, amount, p.getUniqueId());
+
+                            sendSuccessMessage(p, "Successfully deposited " + bankManager.formatBalance(amount));
+                        } catch (Exception e) {
+                            LOGGER.log(Level.SEVERE, "Error processing deposit", e);
+                            sendErrorMessage(p, "Deposit failed due to an error.");
+                        }
+
+                        return List.of();
+                    })
+                    .build();
+
+            gui.open(player);
+        } catch (SignGUIVersionException e) {
+            LOGGER.log(Level.SEVERE, "Error creating deposit GUI", e);
+            sendErrorMessage(player, "Failed to open deposit interface.");
+        }
+    }
+
+    private boolean isValidAmount(String amountStr) {
+        if (amountStr == null || amountStr.trim().isEmpty()) {
+            return false;
+        }
+
+        try {
+            double amount = Double.parseDouble(amountStr.trim());
+            return amount > 0 && !Double.isNaN(amount) && !Double.isInfinite(amount);
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
+    private double parseAmount(String amountStr) {
+        try {
+            BigDecimal amount = new BigDecimal(amountStr.trim());
+            return amount.setScale(2, RoundingMode.HALF_UP).doubleValue();
+        } catch (NumberFormatException e) {
+            return 0.0;
+        }
+    }
+
+    private void sendErrorMessage(Player player, String message) {
+        player.sendMessage(Component.text(EZBanks.getPrefix() + "§c" + message));
+        player.playSound(player.getLocation(), Sound.ITEM_OMINOUS_BOTTLE_DISPOSE, 1.0f, 1.0f);
+    }
+
+    private void sendSuccessMessage(Player player, String message) {
+        player.sendMessage(Component.text(EZBanks.getPrefix() + "§a" + message));
+        player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.0f);
+    }
 }

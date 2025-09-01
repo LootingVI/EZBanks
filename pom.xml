@@ -6,7 +6,7 @@
 
     <groupId>de.flori</groupId>
     <artifactId>EZBanks</artifactId>
-    <version>0.7.1-ALPHA</version>
+    <version>1.0.o</version>
     <packaging>jar</packaging>
 
     <name>EZBanks</name>

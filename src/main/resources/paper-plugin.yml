@@ -1,5 +1,5 @@
 name: EZBanks
-author: LootingVI
+author: LootingVI(oFlori)
 version: '${project.version}'
 main: de.flori.ezbanks.EZBanks
 api-version: '1.21'
